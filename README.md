@@ -106,7 +106,7 @@ Cake
 | XiaoFeng.Mvc.AdminWinDesk | XiaoFeng.Mvc.AdminWinDesk | :white_check_mark: | XiaoFeng.Mvc后台皮肤 | 模仿windows桌面后台皮肤 |
 | FayElf.Cube.Blog | FayElf.Cube.Blog | :white_check_mark: | XiaoFeng.Mvc开发的技术博客 | 使用低代码开发框架（XiaoFeng.Mvc）+Windows后台皮肤(XiaoFeng.Mvc.AdminWinDesk)，开发的一个博客平台。 |
 | XiaoFeng.Ofd | XiaoFeng.Ofd | :white_check_mark: | OFD读写库 | OFD 读写处理库，支持文档的生成、文档编辑、文档批注、数字签名、文档合并、文档拆分、文档转换至PDF、文档查询等功能。 |
-| XiaoFeng.Opc | XiaoFeng.Opc | :white_check_mark: | OPC读取写入类 | 通用的opc ua客户端类库，基于netstandard2.0;netstandard2.1;创建，基于官方opc ua基金会跨平台库创建，封装了节点读写、批量节点读写、引用读取、历史数据读取、方法调用、节点订阅、批量订阅、获取节点可用编码、获取指定节点的所有引用等操作。|
+| XiaoFeng.Opc | XiaoFeng.Opc | :white_check_mark: | OPC读写库 | 通用的opc ua客户端类库，基于netstandard2.0;netstandard2.1;创建，基于官方opc ua基金会跨平台库创建，封装了节点读写、批量节点读写、引用读取、历史数据读取、方法调用、节点订阅、批量订阅、获取节点可用编码、获取指定节点的所有引用等操作。|
 
 ## 用法实例
 
