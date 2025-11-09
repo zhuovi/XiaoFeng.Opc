@@ -17,7 +17,7 @@ Nuget：XiaoFeng.Opc
 
 教程： https://www.eelf.cn
 
-通用的opc ua客户端类库，基于netstandard2.0;netstandard2.1;创建，基于官方opc ua基金会跨平台库创建，封装了节点读写、批量节点读写、引用读取、历史数据读取、方法调用、节点订阅、批量订阅、获取节点可用编码、获取指定节点的所有引用等操作。
+通用的opc ua da客户端类库，基于netstandard2.0;netstandard2.1;创建，基于官方opc ua da基金会跨平台库创建，封装了节点读写、批量节点读写、引用读取、历史数据读取、方法调用、节点订阅、批量订阅、获取节点可用编码、获取指定节点的所有引用等操作。
 
 
 ## 感谢支持
@@ -146,7 +146,8 @@ static void wt(object msg)
 
 ```csharp
 //实例化一个客户端
-var uaClient = new XiaoFeng.Opc.UaClient();
+var uaClient = new XiaoFeng.OPC.UA.UaClient();
+var daClient = new XiaoFeng.OPC.DA.DaClient();
 ```
 
 下边属性可以不设置
