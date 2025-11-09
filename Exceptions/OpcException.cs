@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Text;
 
 /****************************************************************
@@ -9,36 +8,35 @@ using System.Text;
 *  QQ : 7092734                                                 *
 *  Email : jacky@eelf.cn                                        *
 *  Site : www.eelf.cn                                           *
-*  Create Time : 2025-06-04 17:01:16                            *
+*  Create Time : 2025-06-04 18:02:43                            *
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
-namespace XiaoFeng.Opc
+namespace XiaoFeng.OPC
 {
     /// <summary>
-    /// 证书路径
+    /// OPC错误消息
     /// </summary>
-    public enum CertificatePath
+    public class OpcException : Exception
     {
+        #region 构造器
         /// <summary>
-        /// 申请证书
+        /// 初始化一个新实例
         /// </summary>
-        [Description("申请证书")]
-        Application,
+        public OpcException() : base() { }
         /// <summary>
-        /// 可信发卡机构证书
+        /// 初始化一个新实例
         /// </summary>
-        [Description("可信发卡机构证书")]
-        TrustedIssuer,
-        /// <summary>
-        /// 可信对等证书
-        /// </summary>
-        [Description("可信对等证书")]
-        TrustedPeer,
-        /// <summary>
-        /// 拒绝证书
-        /// </summary>
-        [Description("拒绝证书")]
-        Rejected
+        /// <param name="message">错误消息</param>
+        public OpcException(string message) : base(message) { }
+        #endregion
+
+        #region 属性
+
+        #endregion
+
+        #region 方法
+        
+        #endregion
     }
 }

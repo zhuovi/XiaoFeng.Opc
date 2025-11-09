@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using XiaoFeng.OPC.DA;
 
 /****************************************************************
 *  Copyright © (2025) www.eelf.cn All Rights Reserved.          *
@@ -8,24 +9,15 @@ using System.Text;
 *  QQ : 7092734                                                 *
 *  Email : jacky@eelf.cn                                        *
 *  Site : www.eelf.cn                                           *
-*  Create Time : 2025-06-04 15:30:10                            *
+*  Create Time : 2025-11-09 13:38:43                            *
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
-namespace XiaoFeng.Opc
+namespace XiaoFeng.OPC.DA
 {
     /// <summary>
-    /// 客户端权限
+    /// 连接事件
     /// </summary>
-    public enum ClientAccess
-    {
-        /// <summary>
-        /// 只读
-        /// </summary>
-       OnlyRead,
-       /// <summary>
-       /// 读写
-       /// </summary>
-       ReadAndWrite
-    }
+    /// <param name="client">客户端</param>
+    public delegate void ConnectEventHandler(DaClient client);
 }

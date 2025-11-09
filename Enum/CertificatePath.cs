@@ -1,6 +1,6 @@
-﻿using Opc.Ua;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 /****************************************************************
@@ -9,48 +9,36 @@ using System.Text;
 *  QQ : 7092734                                                 *
 *  Email : jacky@eelf.cn                                        *
 *  Site : www.eelf.cn                                           *
-*  Create Time : 2025-06-24 16:04:01                            *
+*  Create Time : 2025-06-04 17:01:16                            *
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
-namespace XiaoFeng.OPC.UA.Model
+namespace XiaoFeng.OPC
 {
     /// <summary>
-    /// 删除节点
+    /// 证书路径
     /// </summary>
-    public class DeleteNode
+    public enum CertificatePath
     {
-        #region 构造器
         /// <summary>
-        /// 初始化一个新实例
+        /// 申请证书
         /// </summary>
-        public DeleteNode()
-        {
-
-        }
-        #endregion
-
-        #region 属性
+        [Description("申请证书")]
+        Application,
         /// <summary>
-        /// 节点ID
+        /// 可信发卡机构证书
         /// </summary>
-        public NodeValueId NodeValueId { get; set; }
+        [Description("可信发卡机构证书")]
+        TrustedIssuer,
         /// <summary>
-        /// 写入状态
+        /// 可信对等证书
         /// </summary>
-        public StatusCode StatusCode { get; set; }
-        #endregion
-
-        #region 方法
-        #region 析构器
+        [Description("可信对等证书")]
+        TrustedPeer,
         /// <summary>
-        /// 析构器
+        /// 拒绝证书
         /// </summary>
-        ~DeleteNode()
-        {
-
-        }
-        #endregion
-        #endregion
+        [Description("拒绝证书")]
+        Rejected
     }
 }

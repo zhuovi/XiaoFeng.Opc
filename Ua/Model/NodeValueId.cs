@@ -15,7 +15,7 @@ using XiaoFeng.Collections;
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
-namespace XiaoFeng.Opc.Model
+namespace XiaoFeng.OPC.UA.Model
 {
     /// <summary>
     /// 节点ID

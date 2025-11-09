@@ -1,5 +1,4 @@
-﻿using Opc.Ua.Client;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,16 +8,24 @@ using System.Text;
 *  QQ : 7092734                                                 *
 *  Email : jacky@eelf.cn                                        *
 *  Site : www.eelf.cn                                           *
-*  Create Time : 2025-06-25 11:13:15                            *
+*  Create Time : 2025-06-04 15:30:10                            *
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
-namespace XiaoFeng.OPC.UA
+namespace XiaoFeng.OPC
 {
     /// <summary>
-    /// 连接事件
+    /// 客户端权限
     /// </summary>
-    /// <param name="session">会话</param>
-    public delegate void ConnectEventHandler(OpcConnectEventArgs e);
-    
+    public enum ClientAccess
+    {
+        /// <summary>
+        /// 只读
+        /// </summary>
+       OnlyRead,
+       /// <summary>
+       /// 读写
+       /// </summary>
+       ReadAndWrite
+    }
 }

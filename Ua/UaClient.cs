@@ -16,7 +16,7 @@ using Opc.Ua.Bindings;
 using Opc.Ua.Client;
 using Opc.Ua.Security.Certificates;
 using XiaoFeng.IO;
-using XiaoFeng.Opc.Model;
+using XiaoFeng.OPC.UA.Model;
 using XiaoFeng.Threading;
 
 /****************************************************************
@@ -29,7 +29,7 @@ using XiaoFeng.Threading;
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
-namespace XiaoFeng.Opc
+namespace XiaoFeng.OPC.UA
 {
     /// <summary>
     /// Ua客户端
@@ -186,7 +186,7 @@ namespace XiaoFeng.Opc
         /// <summary>
         /// 初始化
         /// </summary>
-        public async Task InitializeAsync()
+        private async Task InitializeAsync()
         {
             if (this.Configuration == null)
             {
@@ -1012,7 +1012,7 @@ namespace XiaoFeng.Opc
                     }
                 }
 
-                this.Subscriptions.TryAdd(subscriptionName, new SubscriptionData(subscription, monitor));
+                this.Subscriptions.TryAdd(subscriptionName, new SubscriptionData(subscription,monitor));
             }
             return flag;
         }
@@ -1037,7 +1037,7 @@ namespace XiaoFeng.Opc
         /// <returns>返回移除订阅状态 <see langword="true"/> 为成功 <see langword="false"/> 为失败</returns>
         public async Task<bool> RemoveAllSubscriptionAsync(CancellationToken cancellationToken = default)
         {
-            var flag = await this.SessionClient.RemoveSubscriptionsAsync(this.Subscriptions.Values.Select(a => a.Subscription), this.CreateLinkedTokenSource(cancellationToken).Token).ConfigureAwait(false);
+            var flag = await this.SessionClient.RemoveSubscriptionsAsync(this.Subscriptions.Values.Select(a=>a.Subscription), this.CreateLinkedTokenSource(cancellationToken).Token).ConfigureAwait(false);
             this.Subscriptions.Clear();
             return flag;
         }
@@ -1051,9 +1051,9 @@ namespace XiaoFeng.Opc
         /// <param name="enabled">状态</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns>返回设置订阅状态 <see langword="true"/> 为成功 <see langword="false"/> 为失败</returns>
-        public async Task<bool> SetSubscriptionStatusAsync(string subscriptionName, bool enabled, CancellationToken cancellationToken = default)
+        public async Task<bool> SetSubscriptionStatusAsync(string subscriptionName,bool enabled,CancellationToken cancellationToken = default)
         {
-            if (this.Subscriptions.TryGetValue(subscriptionName, out var subscriptionData))
+            if(this.Subscriptions.TryGetValue(subscriptionName,out var subscriptionData))
             {
                 await subscriptionData.Subscription.SetPublishingModeAsync(enabled, this.CreateLinkedTokenSource(cancellationToken).Token).ConfigureAwait(false);
                 return true;
@@ -1111,7 +1111,7 @@ namespace XiaoFeng.Opc
         /// <param name="subscriptionName">订阅名称</param>
         /// <param name="nodeValueId">节点</param>
         /// <returns>返回移除订阅项状态 <see langword="true"/> 为成功 <see langword="false"/> 为失败</returns>
-        public bool RemoveSubscriptionItem(string subscriptionName, NodeValueId nodeValueId)
+        public bool RemoveSubscriptionItem(string subscriptionName,NodeValueId nodeValueId)
         {
             return this.RemoveSubscriptionItem(subscriptionName, new List<NodeValueId> { nodeValueId });
         }
@@ -1264,9 +1264,9 @@ namespace XiaoFeng.Opc
 
             if (serverUrl.IsNullOrEmpty()) throw new OpcException("请输入OPC服务器地址.");
             if (this.Configuration == null) await this.InitializeAsync().ConfigureAwait(false);
-            using (var client = DiscoveryClient.Create(this.Configuration, new Uri(serverUrl)))
+            using (var discoveryClient = DiscoveryClient.Create(this.Configuration, new Uri(serverUrl)))
             {
-                var endpoints = await client.GetEndpointsAsync(null, this.CreateLinkedTokenSource(cancellationToken).Token).ConfigureAwait(false);
+                var endpoints = await discoveryClient.GetEndpointsAsync(null, this.CreateLinkedTokenSource(cancellationToken).Token).ConfigureAwait(false);
                 return endpoints;
             }
         }
@@ -1288,7 +1288,7 @@ namespace XiaoFeng.Opc
             var endpointConfiguration = EndpointConfiguration.Create(this.Configuration);
             endpointConfiguration.OperationTimeout = 5000;
 
-            using (var client = DiscoveryClient.Create(new Uri(serverUrl), endpointConfiguration))
+            using (DiscoveryClient client = DiscoveryClient.Create(new Uri(serverUrl), endpointConfiguration))
             {
                 var servers = await client.FindServersAsync(null, this.CreateLinkedTokenSource(cancellationToken).Token).ConfigureAwait(false);
                 return servers;
@@ -1303,7 +1303,7 @@ namespace XiaoFeng.Opc
         /// <param name="serverUrl">服务器地址 如 opc.tcp://localhost:53530</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns>返回服务器数据</returns>
-        public async Task<ServerOnNetworkCollection> DiscoverNetworkServersAsync(string serverUrl, CancellationToken cancellationToken = default)
+        public async Task<ServerOnNetworkCollection> DiscoverNetworkServersAsync(string serverUrl, CancellationToken cancellationToken=default)
         {
             if (serverUrl.IsNullOrEmpty()) throw new OpcException("请输入OPC服务器地址.");
             if (this.Configuration == null) await this.InitializeAsync().ConfigureAwait(false);
@@ -1311,41 +1311,11 @@ namespace XiaoFeng.Opc
             var endpointConfiguration = EndpointConfiguration.Create(this.Configuration);
             endpointConfiguration.OperationTimeout = 5000;
 
-            using (var client = DiscoveryClient.Create(new Uri(serverUrl), endpointConfiguration))
+            using (DiscoveryClient client = DiscoveryClient.Create(new Uri(serverUrl), endpointConfiguration))
             {
-                var servers = await client.FindServersOnNetworkAsync(null, 0, 100,null, this.CreateLinkedTokenSource(cancellationToken).Token).ConfigureAwait(false);
+                var servers = await client.FindServersOnNetworkAsync(null, 0, 0, new[] {"DA"} ,this.CreateLinkedTokenSource(cancellationToken).Token).ConfigureAwait(false);
                 return servers.Servers;
             }
-        }
-        #endregion
-
-        #region 获取节点可用编码
-        /// <summary>
-        /// 获取节点可用编码
-        /// </summary>
-        /// <param name="nodeValueId">节点</param>
-        /// <param name="cancellationToken">取消令牌</param>
-        /// <returns></returns>
-        public async Task<ReferenceDescriptionCollection> ReadAvailableEncodingsAsync(NodeValueId nodeValueId, CancellationToken cancellationToken = default)
-        {
-            return await Task.Run(() =>
-            {
-                var value = this.SessionClient.ReadAvailableEncodings((NodeId)nodeValueId);
-                return value;
-            },this.CreateLinkedTokenSource(cancellationToken).Token).ConfigureAwait(false);
-        }
-        #endregion
-
-        #region  获取指定节点的所有引用
-        /// <summary>
-        /// 获取指定节点的所有引用
-        /// </summary>
-        /// <param name="nodeId">节点</param>
-        /// <param name="cancellationToken">取消令牌</param>
-        /// <returns></returns>
-        public async Task<ReferenceDescriptionCollection> FetchReferencesAsync(NodeValueId nodeId, CancellationToken cancellationToken = default)
-        {
-            return await this.SessionClient.FetchReferencesAsync((NodeId)nodeId, this.CreateLinkedTokenSource(cancellationToken).Token).ConfigureAwait(false);
         }
         #endregion
 
@@ -1362,7 +1332,7 @@ namespace XiaoFeng.Opc
                 this.CancellationTokenSource.Token
             };
             tokens.AddRange(cancellationTokens.Where(token => token != CancellationToken.None && !token.IsCancellationRequested));
-
+            
             return CancellationTokenSource.CreateLinkedTokenSource(tokens.ToArray());
         }
         #endregion

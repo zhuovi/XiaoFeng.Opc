@@ -1,5 +1,4 @@
-﻿using Opc.Ua.Client;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,59 +8,51 @@ using System.Text;
 *  QQ : 7092734                                                 *
 *  Email : jacky@eelf.cn                                        *
 *  Site : www.eelf.cn                                           *
-*  Create Time : 2025-06-25 14:39:44                            *
+*  Create Time : 2025-11-03 21:39:09                            *
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
-namespace XiaoFeng.OPC.UA.Model
+namespace XiaoFeng.OPC.DA.Model
 {
     /// <summary>
-    /// 订阅数据
+    /// 项数据值
     /// </summary>
-    public class SubscriptionData
+    public class ItemDataValue
     {
         #region 构造器
         /// <summary>
         /// 初始化一个新实例
         /// </summary>
-        public SubscriptionData()
+        public ItemDataValue()
         {
 
         }
         /// <summary>
         /// 初始化一个新实例
         /// </summary>
-        /// <param name="subscription">订阅</param>
-        /// <param name="notification">回调事件</param>
-        public SubscriptionData(Subscription subscription, MonitoredItemNotificationEventHandler notification)
+        /// <param name="name">项名称</param>
+        /// <param name="value">项值</param>
+        public ItemDataValue(string name, object value)
         {
-            Subscription = subscription;
-            Notification = notification;
+            Name = name;
+            Value = value;
         }
 
         #endregion
 
         #region 属性
         /// <summary>
-        /// 订阅
+        /// 项名称
         /// </summary>
-        public Subscription Subscription { get; set; }
+        public string Name { get; set; }
         /// <summary>
-        /// 订阅事件
+        /// 项值
         /// </summary>
-        public MonitoredItemNotificationEventHandler Notification;
+        public object Value { get; set; }
         #endregion
 
         #region 方法
-        #region 析构器
-        /// <summary>
-        /// 析构器
-        /// </summary>
-        ~SubscriptionData()
-        {
 
-        }
-        #endregion
         #endregion
     }
 }

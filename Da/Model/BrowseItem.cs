@@ -1,5 +1,4 @@
-﻿using Opc.Ua.Client;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,59 +8,53 @@ using System.Text;
 *  QQ : 7092734                                                 *
 *  Email : jacky@eelf.cn                                        *
 *  Site : www.eelf.cn                                           *
-*  Create Time : 2025-06-25 14:39:44                            *
+*  Create Time : 2025-11-03 21:26:44                            *
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
-namespace XiaoFeng.OPC.UA.Model
+namespace XiaoFeng.OPC.DA.Model
 {
     /// <summary>
-    /// 订阅数据
+    /// 浏览项
     /// </summary>
-    public class SubscriptionData
+    public class BrowseItem
     {
         #region 构造器
         /// <summary>
         /// 初始化一个新实例
         /// </summary>
-        public SubscriptionData()
-        {
-
-        }
+        public BrowseItem() { }
         /// <summary>
         /// 初始化一个新实例
         /// </summary>
-        /// <param name="subscription">订阅</param>
-        /// <param name="notification">回调事件</param>
-        public SubscriptionData(Subscription subscription, MonitoredItemNotificationEventHandler notification)
+        /// <param name="name">项名称</param>
+        /// <param name="id">项Id</param>
+        /// <param name="hasChildren">是否有子集</param>
+        public BrowseItem(string name, string id, bool hasChildren)
         {
-            Subscription = subscription;
-            Notification = notification;
+            Name = name;
+            Id = id;
+            HasChildren = hasChildren;
         }
-
         #endregion
 
         #region 属性
         /// <summary>
-        /// 订阅
+        /// 名称
         /// </summary>
-        public Subscription Subscription { get; set; }
+        public string Name { get; set; }
         /// <summary>
-        /// 订阅事件
+        /// Id
         /// </summary>
-        public MonitoredItemNotificationEventHandler Notification;
+        public string Id { get; set; }
+        /// <summary>
+        /// 是否是子集
+        /// </summary>
+        public Boolean HasChildren { get; set; }
         #endregion
 
         #region 方法
-        #region 析构器
-        /// <summary>
-        /// 析构器
-        /// </summary>
-        ~SubscriptionData()
-        {
 
-        }
-        #endregion
         #endregion
     }
 }
