@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using XiaoFeng.Opc.Model;
+using XiaoFeng.OPC.UA.Model;
 
 /****************************************************************
 *  Copyright © (2025) www.eelf.cn All Rights Reserved.          *
@@ -17,7 +17,7 @@ using XiaoFeng.Opc.Model;
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
-namespace XiaoFeng.Opc
+namespace XiaoFeng.OPC
 {
     /// <summary>
     /// OPC扩展

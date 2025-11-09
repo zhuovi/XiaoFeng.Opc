@@ -2,8 +2,8 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;</TargetFrameworks>
 	  <OutputType>Library</OutputType>
-	  <Product>XiaoFeng.Opc</Product>
-	  <Title>XiaoFeng.Opc</Title>
+	  <Product>XiaoFeng.OPC</Product>
+	  <Title>XiaoFeng.OPC</Title>
 	  <Authors>Jacky</Authors>
 	  <Description>Opc操作类</Description>
 	  <Copyright>CopyRight @ 2024-2026 易精灵(www.eelf.cn) QQ:7092734 Email:jacky@eelf.cn</Copyright>
@@ -40,10 +40,11 @@
 		<None Include="x.png" Pack="true" PackagePath="\" />
 		<None Include="XiaoFeng.snk" Pack="true" PackagePath="\" />
 	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="XiaoFeng" Version="5.2.10"/>
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XiaoFeng\XiaoFeng.csproj" />
+  </ItemGroup>
   <ItemGroup>
 	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client" Version="1.5.376.213" />
+	  <PackageReference Include="Quick.OpcNetApi.Com" Version="2.1.108" />
   </ItemGroup>
 </Project>
