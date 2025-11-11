@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Opc.Da;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,7 +18,7 @@ namespace XiaoFeng.OPC.DA.Model
     /// <summary>
     /// 浏览项
     /// </summary>
-    public class BrowseItem
+    public class BrowseItem:BrowseElement
     {
         #region 构造器
         /// <summary>
@@ -28,29 +29,40 @@ namespace XiaoFeng.OPC.DA.Model
         /// 初始化一个新实例
         /// </summary>
         /// <param name="name">项名称</param>
-        /// <param name="id">项Id</param>
-        /// <param name="hasChildren">是否有子集</param>
-        public BrowseItem(string name, string id, bool hasChildren)
+        /// <param name="itemName">项Id</param>
+        /// <param name="itemPath">项路径</param>
+        public BrowseItem(string name, string itemName, string itemPath)
         {
             Name = name;
-            Id = id;
-            HasChildren = hasChildren;
+            ItemName = itemName;
+            ItemPath = itemPath;
+            IsItem = true;
+            HasChildren = false;
+            Children = null;
+        }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="name">项名称</param>
+        /// <param name="itemName">项Id</param>
+        /// <param name="itemPath">项路径</param>
+        /// <param name="children">子集</param>
+        public BrowseItem(string name, string itemName, string itemPath, List<BrowseItem> children)
+        {
+            Name = name;
+            ItemName = itemName;
+            ItemPath = itemPath;
+            IsItem = false;
+            HasChildren = !(children == null || children.Count == 0);
+            Children = children;
         }
         #endregion
 
         #region 属性
         /// <summary>
-        /// 名称
+        /// 子节点
         /// </summary>
-        public string Name { get; set; }
-        /// <summary>
-        /// Id
-        /// </summary>
-        public string Id { get; set; }
-        /// <summary>
-        /// 是否是子集
-        /// </summary>
-        public Boolean HasChildren { get; set; }
+        public List<BrowseItem> Children { get; set; }
         #endregion
 
         #region 方法

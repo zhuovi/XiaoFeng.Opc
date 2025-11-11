@@ -1,15 +1,15 @@
 ﻿using Opc;
 using Opc.Da;
+using OpcRcw.Comn;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using XiaoFeng.OPC.DA;
 using XiaoFeng.OPC.DA.Model;
+
 
 /****************************************************************
 *  Copyright © (2025) www.eelf.cn All Rights Reserved.          *
@@ -96,18 +96,24 @@ namespace XiaoFeng.OPC.DA
         /// </summary>
         public event DataChangedEventHandler OnDataChanged;
         /// <summary>
-        /// 连接数据
+        /// 凭证
         /// </summary>
-        public ConnectData ConnectData { get; set; }
+        public NetworkCredential Credential { get; set; } = new NetworkCredential();
+        /// <summary>
+        /// 代理
+        /// </summary>
+        public WebProxy Proxy { get; set; } = new WebProxy();
+        /// <summary>
+        /// 是否使用DA 2.0
+        /// </summary>
+        public bool AlwaysUseDA20 { get; set; }
+        /// <summary>
+        /// 许可密钥
+        /// </summary>
+        public string LicenseKey {  get; set; }
         #endregion
 
         #region 方法
-
-        public void Initialize()
-        {
-
-            //OpcCom.Da.Subscription
-        }
 
         #region 连接服务
         /// <summary>
@@ -125,7 +131,12 @@ namespace XiaoFeng.OPC.DA
             if (server == null) return false;
             if (this.OpcDaServer != null && this.IsConnected) this.Disconnect();
             this.OpcDaServer = this.CreateOpcServer(server);
-            this.OpcDaServer.Connect(this.ConnectData);
+
+            var ConnectData = new ConnectData(Credential, Proxy);
+            if (this.AlwaysUseDA20) ConnectData.AlwaysUseDA20 = true;
+            ConnectData.LicenseKey = this.LicenseKey;
+
+            this.OpcDaServer.Connect(ConnectData);
             if (this.OnConnected != null)
                 this.OnConnected.Invoke(this);
             return this.IsConnected;
@@ -168,10 +179,10 @@ namespace XiaoFeng.OPC.DA
                 ItemName = a,
                 ClientHandle = state.ClientHandle,
                 ServerHandle = state.ServerHandle,
-                MaxAgeSpecified=true,
-                MaxAge=0,
-                ActiveSpecified=true,
-                Active=true
+                MaxAgeSpecified = true,
+                MaxAge = 0,
+                ActiveSpecified = true,
+                Active = true
             }).ToArray();
             subscription.AddItems(items);
             //subscription.Refresh();
@@ -385,6 +396,37 @@ namespace XiaoFeng.OPC.DA
         }
         #endregion
 
+        #region 获取所有节点
+        /// <summary>
+        /// 获取所有节点
+        /// </summary>
+        /// <param name="node">节点</param>
+        /// <param name="filter">浏览筛选器</param>
+        /// <returns></returns>
+        public List<BrowseItem> BrowerNodes(string node="",browseFilter filter= browseFilter.all)
+        {
+            var list = new List<BrowseItem>();
+            var items = Brower(node, filter);
+            if (items == null || items.Length == 0) return null;
+            items.Each(a =>
+            {
+                var item = new BrowseItem(a.Name, a.ItemName, a.ItemPath);
+                if(!a.IsItem)
+                {
+                    item.IsItem = false;
+                    if (a.HasChildren)
+                    {
+                        item.HasChildren = true;
+                        item.Children = this.BrowerNodes(item.ItemName, filter);
+                    }
+                    else item.Children = null;
+                }
+                list.Add(item);
+            });
+            return list;
+        }
+        #endregion
+
         #region 断开连接
         /// <summary>
         /// 断开连接
@@ -447,12 +489,12 @@ namespace XiaoFeng.OPC.DA
         /// <returns></returns>
         public async Task<List<Model.ServerHost>> DiscoverServersAsync(string ip, CancellationToken cancellationToken = default)
         {
-            if (ip.IsNullOrEmpty()) return null;
             return await Task.Factory.StartNew(() =>
             {
                 using (var discovery = new OpcCom.ServerEnumerator())
                 {
-                    var enumerate = discovery.GetAvailableServers(Specification.COM_DA_20, ip, null);
+                    var enumerate = discovery.GetAvailableServers(Specification.COM_DA_20, ip.IsNullOrEmpty() ? null : ip, null);
+                    
                     return new List<Model.ServerHost>(enumerate.Select(i => new Model.ServerHost(i.Name, i.Url)));
                 }
             }, CreateLinkedTokenSource(cancellationToken).Token);
@@ -498,7 +540,7 @@ namespace XiaoFeng.OPC.DA
         public Opc.Da.Server CreateOpcServerAndConnect(string url)
         {
             var server = CreateOpcServer(url);
-            server.Connect(this.ConnectData);
+            server.Connect();
             return server;
         }
         #endregion
