@@ -29,14 +29,42 @@ namespace XiaoFeng.OPC
         /// </summary>
         /// <param name="message">错误消息</param>
         public OpcException(string message) : base(message) { }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="message">错误消息</param>
+        /// <param name="innerException">导致当前异常的异常</param>
+        public OpcException(string message, Exception innerException) : base(message, innerException) { }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="message">错误消息</param>
+        /// <param name="errorCode">错误代码</param>
+        /// <param name="innerException">导致当前异常的异常</param>
+        public OpcException(string message, int errorCode, Exception innerException) : this(message, innerException)
+        {
+            this.ErrorCode = errorCode;
+        }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="message">错误消息</param>
+        /// <param name="errorCode">错误代码</param>
+        public OpcException(string message,int errorCode) : base(message)
+        {
+            this.ErrorCode = errorCode;
+        }
         #endregion
 
         #region 属性
-
+        /// <summary>
+        /// 错误代码
+        /// </summary>
+        public int ErrorCode { get; }
         #endregion
 
         #region 方法
-        
+
         #endregion
     }
 }
