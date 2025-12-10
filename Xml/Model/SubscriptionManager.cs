@@ -31,13 +31,17 @@ namespace XiaoFeng.OPC.XML.Model
         #endregion
 
         #region 属性
-
+        /// <summary>
+        /// 订阅集合
+        /// </summary>
+        private readonly Dictionary<string, SubscriptionInfo> _subscriptions = new Dictionary<string, SubscriptionInfo>();
+        /// <summary>
+        /// 锁
+        /// </summary>
+        private readonly object _lockObj = new object();
         #endregion
 
         #region 方法
-        private readonly Dictionary<string, SubscriptionInfo> _subscriptions = new Dictionary<string, SubscriptionInfo>();
-        private readonly object _lockObj = new object();
-
         /// <summary>
         /// 添加订阅
         /// </summary>
