@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using XiaoFeng.OPC.XmlDa.Model;
 
 /****************************************************************
 *  Copyright © (2026) www.eelf.cn All Rights Reserved.          *
@@ -30,10 +31,32 @@ namespace XiaoFeng.OPC.XmlDa
         #endregion
 
         #region 属性
+        /// <summary>
+        /// Soap 命名空间
+        /// </summary>
+        public const string SoapNamespace = "http://schemas.xmlsoap.org/soap/envelope/";
+        /// <summary>
+        /// 请求体命名空间
+        /// </summary>
+        public const string Namesapce = "http://opcfoundation.org/webservices/XMLDA/{0}/";
 
         #endregion
 
         #region 方法
+
+        #region 获取 Soap 请求 Action
+        /// <summary>
+        /// 获取 Soap 请求 Action
+        /// </summary>
+        /// <param name="soapAction">请求类型</param>
+        /// <param name="soapVersion">协议版本</param>
+        /// <returns></returns>
+        public static string GetSoapAction(SoapAction soapAction, OpcXmlVersion soapVersion= OpcXmlVersion.XmlDa10)
+        {
+            return $"http://opcfoundation.org/XMLDA/{(double)soapVersion/10:F2}/{soapAction}";
+        }
+        #endregion
+
 
         #endregion
     }

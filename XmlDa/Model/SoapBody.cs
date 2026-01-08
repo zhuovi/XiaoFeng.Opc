@@ -30,6 +30,9 @@ namespace XiaoFeng.OPC.XmlDa.Model
         #endregion
 
         #region 属性
+        /// <summary>
+        /// Body值
+        /// </summary>
         public T Value { get; set; }
         #endregion
 

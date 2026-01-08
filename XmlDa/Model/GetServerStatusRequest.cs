@@ -16,9 +16,9 @@ using System.Xml.Serialization;
 namespace XiaoFeng.OPC.XmlDa.Model
 {
     /// <summary>
-    /// GetServerStatusRequest 类说明
+    /// 获取请求状态
     /// </summary>
-    [XmlRoot("GetServerStatus",Namespace = "http://opcfoundation.org/XMLDA/1.0/")]
+    [XmlRoot("GetStatus",Namespace = XmlDaHelper.Namesapce)]
     public class GetServerStatusRequest
     {
         #region 构造器
@@ -32,7 +32,15 @@ namespace XiaoFeng.OPC.XmlDa.Model
         #endregion
 
         #region 属性
+        /// <summary>
+        /// 区域ID
+        /// </summary>
+        [XmlAttribute("LocaleID")]
         public string LocaleID { get; set; } = "en-US";
+        /// <summary>
+        /// 客户端请求句柄
+        /// </summary>
+        [XmlAttribute("ClientRequestHandle")]
         public string ClientRequestHandle { get; set; } = Guid.NewGuid().ToString("N");
         #endregion
 

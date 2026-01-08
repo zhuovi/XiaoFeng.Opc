@@ -18,7 +18,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
     /// <summary>
     /// 基础模型
     /// </summary>
-    [XmlRoot("Envelope",Namespace = "http://schemas.xmlsoap.org/soap/envelope/")]
+    [XmlRoot("Envelope",Namespace = XmlDaHelper.SoapNamespace)]
     public class Envelope<T> where T:class
     {
         #region 构造器
@@ -28,7 +28,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         public Envelope()
         {
             this.Namespaces = new XmlSerializerNamespaces();
-            this.Namespaces.Add("soap", "http://schemas.xmlsoap.org/soap/envelope/");
+            this.Namespaces.Add("soap", XmlDaHelper.SoapNamespace);
             this.Namespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
             this.Namespaces.Add("xsd", "http://www.w3.org/2001/XMLSchema");
         }
