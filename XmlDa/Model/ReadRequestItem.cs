@@ -9,23 +9,22 @@ using System.Xml.Serialization;
 *  QQ : 7092734                                                 *
 *  Email : jacky@eelf.cn                                        *
 *  Site : www.eelf.cn                                           *
-*  Create Time : 2026-01-08 10:53:12                            *
+*  Create Time : 2026-01-08 23:16:51                            *
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
 namespace XiaoFeng.OPC.XmlDa.Model
 {
     /// <summary>
-    /// 获取服务器状态响应
+    /// 读取请求项
     /// </summary>
-    [XmlRoot("GetStatusResponse", Namespace = XmlDaHelper.Namesapce)]
-    public class GetServerStatusResponse
+    public class ReadRequestItem
     {
         #region 构造器
         /// <summary>
         /// 初始化一个新实例
         /// </summary>
-        public GetServerStatusResponse()
+        public ReadRequestItem()
         {
 
         }
@@ -33,35 +32,33 @@ namespace XiaoFeng.OPC.XmlDa.Model
 
         #region 属性
         /// <summary>
-        /// 服务器状态
+        /// 项目路径
         /// </summary>
-        [XmlElement("Status")]
-        public ServerStatus ServerStatus { get; set; }
+        [XmlAttribute("ItemPath")]
+        public string ItemPath { get; set; }
         /// <summary>
-        /// 状态结果
+        /// 需求类型
         /// </summary>
-        public ReplyBase GetStatusResult { get; set; }
+        [XmlAttribute("ReqType")]
+        public string ReqType { get; set; }
         /// <summary>
-        /// 客户端请求句柄
+        /// 最大期限
         /// </summary>
-        public string ClientRequestHandle { get; set; }
+        [XmlAttribute("MaxAge")]
+        public int MaxAge { get; set; }
         /// <summary>
-        /// 服务端请求句柄
+        /// 项目名称
         /// </summary>
-        public string ServerRequestHandle { get; set; }
+        [XmlAttribute("ItemName")]
+        public string ItemName { get; set; }
+        /// <summary>
+        /// 客户端项目句柄
+        /// </summary>
+        [XmlAttribute("ClientItemHandle")]
+        public string ClientItemHandle { get; set; }
         #endregion
 
         #region 方法
-
-        #region 析构器
-        /// <summary>
-        /// 析构器
-        /// </summary>
-        ~GetServerStatusResponse()
-        {
-
-        }
-        #endregion
 
         #endregion
     }

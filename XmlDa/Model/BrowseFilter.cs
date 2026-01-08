@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
-using System.Xml.Serialization;
-using XiaoFeng.OPC.XmlDa;
 
 /****************************************************************
 *  Copyright © (2026) www.eelf.cn All Rights Reserved.          *
@@ -10,53 +9,31 @@ using XiaoFeng.OPC.XmlDa;
 *  QQ : 7092734                                                 *
 *  Email : jacky@eelf.cn                                        *
 *  Site : www.eelf.cn                                           *
-*  Create Time : 2026-01-08 19:11:09                            *
+*  Create Time : 2026-01-08 23:51:23                            *
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
 namespace XiaoFeng.OPC.XmlDa.Model
 {
     /// <summary>
-    /// 读取请求
+    /// 浏览筛选器
     /// </summary>
-    [XmlRoot("Read", Namespace = XmlDaHelper.Namesapce)]
-    public class ReadRequest
+    public enum BrowseFilter
     {
-        #region 构造器
         /// <summary>
-        /// 初始化一个新实例
+        /// 所有
         /// </summary>
-        public ReadRequest()
-        {
-
-        }
-        #endregion
-
-        #region 属性
+        [Description("所有")]
+        all,
         /// <summary>
-        /// 读配置
+        /// 分支
         /// </summary>
-        [XmlElement("Options")]
-        public RequestOptions Options { get; set; }
+        [Description("分支")] 
+        branch,
         /// <summary>
-        /// 项列表
+        /// 项目
         /// </summary>
-        [XmlElement("ItemList")]
-        public ReadRequestItemList ItemList { get; set; }
-        #endregion
-
-        #region 方法
-
-        #region 析构器
-        /// <summary>
-        /// 析构器
-        /// </summary>
-        ~ReadRequest()
-        {
-
-        }
-        #endregion
-
-        #endregion
+        [Description("项目")] 
+        item,
     }
 }

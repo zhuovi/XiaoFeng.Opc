@@ -18,13 +18,13 @@ namespace XiaoFeng.OPC.XmlDa.Model
     /// <summary>
     /// ReadOptions 类说明
     /// </summary>
-    public class ReadOptions
+    public class RequestOptions
     {
         #region 构造器
         /// <summary>
         /// 初始化一个新实例
         /// </summary>
-        public ReadOptions()
+        public RequestOptions()
         {
 
         }
@@ -32,25 +32,45 @@ namespace XiaoFeng.OPC.XmlDa.Model
 
         #region 属性
         /// <summary>
-        /// 错误信息
+        /// 返回错误文本
         /// </summary>
         [XmlAttribute("ReturnErrorText")]
         public bool ReturnErrorText { get; set; } = true;
         /// <summary>
-        /// 项时间
+        /// 返回诊断信息
+        /// </summary>
+        [XmlAttribute("ReturnDiagnosticInfo")]
+        public bool ReturnDiagnosticInfo { get; set; } = false;
+        /// <summary>
+        /// 返回项目时间
         /// </summary>
         [XmlAttribute("ReturnItemTime")] 
-        public bool ReturnItemTime { get; set; } = true;
+        public bool ReturnItemTime { get; set; } = false;
         /// <summary>
-        /// 项名称
+        /// 返回项目路径
+        /// </summary>
+        [XmlAttribute("ReturnItemPath")]
+        public bool ReturnItemPath { get; set; } = false;
+        /// <summary>
+        /// 返回项目名称
         /// </summary>
         [XmlAttribute("ReturnItemName")] 
-        public bool ReturnTimeName { get; set; } = true;
+        public bool ReturnTimeName { get; set; } = false;
+        /// <summary>
+        /// 请求截止日期
+        /// </summary>
+        [XmlAttribute("RequestDeadline")]
+        public DateTime RequestDeadline { get; set; }
         /// <summary>
         /// 区域ID
         /// </summary>
         [XmlAttribute("LocaleID")] 
         public string LocaleID { get; set; }
+        /// <summary>
+        /// 客户端请求句柄
+        /// </summary>
+        [XmlAttribute("ClientRequestHandle")]
+        public string ClientRequestHandle { get; set; }
         #endregion
 
         #region 方法
@@ -59,7 +79,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 析构器
         /// </summary>
-        ~ReadOptions()
+        ~RequestOptions()
         {
 
         }

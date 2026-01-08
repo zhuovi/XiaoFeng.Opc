@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
-using System.Xml.Serialization;
-using XiaoFeng.OPC.XmlDa;
 
 /****************************************************************
 *  Copyright © (2026) www.eelf.cn All Rights Reserved.          *
@@ -10,53 +9,36 @@ using XiaoFeng.OPC.XmlDa;
 *  QQ : 7092734                                                 *
 *  Email : jacky@eelf.cn                                        *
 *  Site : www.eelf.cn                                           *
-*  Create Time : 2026-01-08 19:11:09                            *
+*  Create Time : 2026-01-08 23:48:52                            *
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
 namespace XiaoFeng.OPC.XmlDa.Model
 {
     /// <summary>
-    /// 读取请求
+    /// 限制位
     /// </summary>
-    [XmlRoot("Read", Namespace = XmlDaHelper.Namesapce)]
-    public class ReadRequest
+    public enum LimitBits
     {
-        #region 构造器
         /// <summary>
-        /// 初始化一个新实例
+        /// 无
         /// </summary>
-        public ReadRequest()
-        {
-
-        }
-        #endregion
-
-        #region 属性
+        [Description("无")]
+        none,
         /// <summary>
-        /// 读配置
+        /// 低
         /// </summary>
-        [XmlElement("Options")]
-        public RequestOptions Options { get; set; }
+        [Description("低")] 
+        low,
         /// <summary>
-        /// 项列表
+        /// 高
         /// </summary>
-        [XmlElement("ItemList")]
-        public ReadRequestItemList ItemList { get; set; }
-        #endregion
-
-        #region 方法
-
-        #region 析构器
+        [Description("高")] 
+        high,
         /// <summary>
-        /// 析构器
+        /// 正常
         /// </summary>
-        ~ReadRequest()
-        {
-
-        }
-        #endregion
-
-        #endregion
+        [Description("正常")] 
+        constant,
     }
 }

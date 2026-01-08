@@ -9,22 +9,23 @@ using System.Xml.Serialization;
 *  QQ : 7092734                                                 *
 *  Email : jacky@eelf.cn                                        *
 *  Site : www.eelf.cn                                           *
-*  Create Time : 2026-01-08 17:13:31                            *
+*  Create Time : 2026-01-09 01:10:37                            *
 *  Version : v 1.0.0                                            *
 *  CLR Version : 4.0.30319.42000                                *
 *****************************************************************/
 namespace XiaoFeng.OPC.XmlDa.Model
 {
     /// <summary>
-    /// 状态结果
+    /// 订阅轮询刷新请求
     /// </summary>
-    public class GetStatusResult
+    [XmlRoot("SubscriptionPolledRefresh", Namespace = XmlDaHelper.Namesapce)]
+    public class SubscriptionPolledRefreshRequest
     {
         #region 构造器
         /// <summary>
         /// 初始化一个新实例
         /// </summary>
-        public GetStatusResult()
+        public SubscriptionPolledRefreshRequest()
         {
 
         }
@@ -32,43 +33,33 @@ namespace XiaoFeng.OPC.XmlDa.Model
 
         #region 属性
         /// <summary>
-        /// 接收时间
+        /// 读配置
         /// </summary>
-        [XmlAttribute("RcvTime")]
-        public DateTime RcvTime { get; set; }
+        [XmlElement("Options")]
+        public RequestOptions Options { get; set; }
         /// <summary>
-        /// 答复时间
+        /// 服务器子句柄
         /// </summary>
-        [XmlAttribute("ReplyTime")]
-        public DateTime ReplyTime { get; set; }
+        [XmlElement("ServerSubHandles")]
+        public List<string> ServerSubHandles { get; set; }
         /// <summary>
-        /// 修订后区域ID
+        /// 保持时间
         /// </summary>
-        [XmlAttribute("RevisedLocaleID")]
-        public string RevisedLocaleID { get; set; }
+        [XmlAttribute("HoldTime")]
+        public DateTime HoldTime { get; set; }
         /// <summary>
-        /// 客户端请求句柄
+        /// 等待时间
         /// </summary>
-        [XmlAttribute("ClientRequestHandle")]
-        public string ClientRequestHandle { get; set; }
+        [XmlAttribute("WaitTime")]
+        public int WaitTime { get; set; }
         /// <summary>
-        /// 服务器状态
+        /// 返回所有项目
         /// </summary>
-        [XmlAttribute("ServerState")]
-        public string ServerState { get; set; }
+        [XmlAttribute("ReturnAllItems")]
+        public bool ReturnAllItems { get; set; }
         #endregion
 
         #region 方法
-
-        #region 析构器
-        /// <summary>
-        /// 析构器
-        /// </summary>
-        ~GetStatusResult()
-        {
-
-        }
-        #endregion
 
         #endregion
     }
