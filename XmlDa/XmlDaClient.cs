@@ -60,7 +60,7 @@ namespace XiaoFeng.OPC.XmlDa
         /// <returns></returns>
         public async Task<ResponseResult<ServerStatus>> GetServerStatusAsync()
         {
-            var model = new Envelope<GetServerStatusRequest>
+            var request = new Envelope<GetServerStatusRequest>
             {
                 Body = new SoapBody<GetServerStatusRequest>
                 {
@@ -71,7 +71,7 @@ namespace XiaoFeng.OPC.XmlDa
                     }
                 }
             };
-            return await this.ExecuteAsync(SoapAction.GetStatus, model, html =>
+            return await this.ExecuteAsync(SoapAction.GetStatus, request, html =>
             {
                 var entity = html.XmlToEntity<Envelope<GetServerStatusResponse>>();
                 if (entity != null && entity.Body?.Value?.ServerStatus != null)
@@ -84,6 +84,58 @@ namespace XiaoFeng.OPC.XmlDa
         #endregion
 
         #region 读项
+
+        #endregion
+
+        #region 写项
+
+        #endregion
+
+        #region 订阅
+
+        #endregion
+
+        #region 取消订阅
+
+        #endregion
+
+        #region 轮询订阅
+
+        #endregion
+
+        #region 浏览
+        /// <summary>
+        /// 浏览节点
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ResponseResult<BrowseResponse>> BrowseAsync()
+        {
+            var request = new Envelope<BrowseRequest>
+            {
+                Body = new SoapBody<BrowseRequest>
+                {
+                    Value = new BrowseRequest
+                    {
+                        BrowseFilter = BrowseFilter.all,
+                        ReturnAllProperties = true,
+                        ReturnPropertyValues = true,
+                         PropertyNames=new List<QualifiedName> {  new QualifiedName("Simulator") }
+                    }
+                }
+            };
+            return await this.ExecuteAsync(SoapAction.Browse, request, html =>
+            {
+                var entity = html.XmlToEntity<Envelope<BrowseResponse>>();
+                if (entity != null && entity.Body?.Value != null)
+                {
+                    return entity.Body?.Value;
+                }
+                return null;
+            }).ConfigureAwait(false);
+        }
+        #endregion
+
+        #region 获取属性
 
         #endregion
 
