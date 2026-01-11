@@ -30,6 +30,16 @@ namespace XiaoFeng.OPC.XmlDa.Model
         {
 
         }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="itemName">项目名称</param>
+        /// <param name="itemPath">项目路径</param>
+        public BrowseRequest(string itemName, string itemPath = "")
+        {
+            this.ItemName = itemName;
+            this.ItemPath = itemPath;
+        }
         #endregion
 
         #region 属性
@@ -88,17 +98,17 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// 返回所有属性
         /// </summary>
         [XmlAttribute("ReturnAllProperties")]
-        public bool ReturnAllProperties { get; set; }
+        public bool ReturnAllProperties { get; set; } = true;
         /// <summary>
         /// 返回所有属性值
         /// </summary>
         [XmlAttribute("ReturnPropertyValues")]
-        public bool ReturnPropertyValues { get; set; }
+        public bool ReturnPropertyValues { get; set; } = true;
         /// <summary>
         /// 返回错误信息
         /// </summary>
         [XmlAttribute("ReturnErrorText")]
-        public bool ReturnErrorText { get; set; }
+        public bool ReturnErrorText { get; set; } = true;
         #endregion
 
         #region 方法

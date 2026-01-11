@@ -16,7 +16,7 @@ using System.Xml.Serialization;
 namespace XiaoFeng.OPC.XmlDa.Model
 {
     /// <summary>
-    /// ReadOptions 类说明
+    /// 读取配置
     /// </summary>
     public class RequestOptions
     {
@@ -45,17 +45,17 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// 返回项目时间
         /// </summary>
         [XmlAttribute("ReturnItemTime")] 
-        public bool ReturnItemTime { get; set; } = false;
+        public bool ReturnItemTime { get; set; } = true;
         /// <summary>
         /// 返回项目路径
         /// </summary>
         [XmlAttribute("ReturnItemPath")]
-        public bool ReturnItemPath { get; set; } = false;
+        public bool ReturnItemPath { get; set; } = true;
         /// <summary>
         /// 返回项目名称
         /// </summary>
         [XmlAttribute("ReturnItemName")] 
-        public bool ReturnTimeName { get; set; } = false;
+        public bool ReturnTimeName { get; set; } = true;
         /// <summary>
         /// 请求截止日期
         /// </summary>

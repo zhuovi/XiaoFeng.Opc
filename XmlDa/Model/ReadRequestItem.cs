@@ -28,6 +28,30 @@ namespace XiaoFeng.OPC.XmlDa.Model
         {
 
         }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="itemName">项目名称</param>
+        /// <param name="itemPath">项目路径</param>
+        /// <param name="reqType">需求类型</param>
+        /// <param name="maxAge">最大期限</param>
+        /// <param name="clientItemHandle">客户端项目句柄</param>
+        public ReadRequestItem(string itemName, string itemPath, string reqType, int maxAge, string clientItemHandle)
+        {
+            ItemName = itemName;
+            ItemPath = itemPath;
+            ReqType = reqType;
+            MaxAge = maxAge;
+            ClientItemHandle = clientItemHandle;
+        }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="itemName">项目名称</param>
+        public ReadRequestItem(string itemName)
+        {
+            ItemName = itemName;
+        }
         #endregion
 
         #region 属性

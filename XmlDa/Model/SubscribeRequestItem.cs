@@ -65,7 +65,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// 启用缓冲
         /// </summary>
         [XmlAttribute("EnableBuffering")]
-        public bool EnableBuffering { get; set; }
+        public bool EnableBuffering { get; set; } = true;
         #endregion
 
         #region 方法

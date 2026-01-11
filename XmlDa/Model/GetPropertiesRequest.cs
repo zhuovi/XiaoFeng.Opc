@@ -61,17 +61,17 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// 返回所有属性
         /// </summary>
         [XmlAttribute("ReturnAllProperties")]
-        public bool ReturnAllProperties { get; set; }
+        public bool ReturnAllProperties { get; set; } = true;
         /// <summary>
         /// 返回所有属性值
         /// </summary>
         [XmlAttribute("ReturnPropertyValues")]
-        public bool ReturnPropertyValues { get; set; }
+        public bool ReturnPropertyValues { get; set; } = true;
         /// <summary>
         /// 返回错误信息
         /// </summary>
         [XmlAttribute("ReturnErrorText")]
-        public bool ReturnErrorText { get; set; }
+        public bool ReturnErrorText { get; set; } = true;
         #endregion
 
         #region 方法

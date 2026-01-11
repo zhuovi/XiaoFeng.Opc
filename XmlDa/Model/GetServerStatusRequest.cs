@@ -29,6 +29,16 @@ namespace XiaoFeng.OPC.XmlDa.Model
         {
 
         }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="localeId">区域ID</param>
+        /// <param name="clientRequestHandle">客户端请求句柄</param>
+        public GetServerStatusRequest(string localeId,string clientRequestHandle)
+        {
+            this.LocaleID = localeId;
+            this.ClientRequestHandle = clientRequestHandle;
+        }
         #endregion
 
         #region 属性

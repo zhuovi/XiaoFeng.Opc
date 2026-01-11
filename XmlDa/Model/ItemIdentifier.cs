@@ -28,6 +28,14 @@ namespace XiaoFeng.OPC.XmlDa.Model
         {
             
         }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="itemName">项目名称</param>
+        public ItemIdentifier(string itemName)
+        {
+            this.ItemName = itemName;
+        }
         #endregion
 
         #region 属性

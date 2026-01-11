@@ -28,6 +28,14 @@ namespace XiaoFeng.OPC.XmlDa.Model
         {
 
         }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="quality">质量</param>
+        public OPCQuality(QualityBits quality)
+        {
+            this.QualityField = quality;
+        }
         #endregion
 
         #region 属性
