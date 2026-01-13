@@ -79,6 +79,8 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 状态
         /// </summary>
+        [JsonConverter(typeof(Json.StringEnumConverter))]
+        [XmlConverter(typeof(XiaoFeng.Xml.StringEnumConverter))]
         public ResponseStatus Status { get; set; }
         /// <summary>
         /// 错误消息

@@ -33,6 +33,11 @@ namespace XiaoFeng.OPC.XmlDa.Model
 
         #region 属性
         /// <summary>
+        /// 服务器订阅句柄
+        /// </summary>
+        [XmlAttribute]
+        public string ServerSubHandle { get; set; }
+        /// <summary>
         /// 读结果
         /// </summary>
         public ReplyBase SubscribeResult { get; set; }

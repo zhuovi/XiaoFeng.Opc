@@ -16,7 +16,7 @@ using System.Xml.Serialization;
 namespace XiaoFeng.OPC.XmlDa.Model
 {
     /// <summary>
-    /// 项止值
+    /// 项目值
     /// </summary>
     public class ItemValue
     {
@@ -72,7 +72,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// 时间戳
         /// </summary>
         [XmlAttribute("Timestamp")]
-        public DateTime Timestamp { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.Now;
         #endregion
 
         #region 方法

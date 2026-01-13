@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace XiaoFeng.OPC.XmlDa
         /// </summary>
         public XmlDaClient()
         {
-
+            this.SubscriptionManager = new SubscriptionManager();
         }
         #endregion
 
@@ -49,6 +50,14 @@ namespace XiaoFeng.OPC.XmlDa
         /// 服务器地址
         /// </summary>
         public Uri ServerAddress { get; set; }
+        /// <summary>
+        /// 订阅管理器
+        /// </summary>
+        public SubscriptionManager SubscriptionManager { get; set; }
+        /// <summary>
+        /// 订阅回调器
+        /// </summary>
+        public event NotificationEventHadler SubscriptinNotification;
         #endregion
 
         #region 方法
@@ -109,7 +118,7 @@ namespace XiaoFeng.OPC.XmlDa
                 {
                     ItemName = name.ItemName,
                     ItemPath = name.ItemPath,
-                    ClientItemHandle = this.ClientRequestHandle
+                    ClientItemHandle = Guid.NewGuid().ToString("N")
                 });
             }
             var request = new Envelope<ReadRequest>
@@ -150,9 +159,9 @@ namespace XiaoFeng.OPC.XmlDa
         /// </summary>
         /// <param name="items">项名</param>
         /// <returns></returns>
-        public async Task<List<NodeValue>> ReadNodeAsync(params ItemIdentifier[] items)
+        public async Task<ResponseResult<List<NodeValue>>> ReadNodeAsync(params ItemIdentifier[] items)
         {
-            if (items == null || items.Length == 0) return null;
+            if (items == null || items.Length == 0) return new ResponseResult<List<NodeValue>>("参数出错.");
             return await this.ReadNodeAsync(new List<ItemIdentifier>(items)).ConfigureAwait(false);
         }
         /// <summary>
@@ -160,17 +169,22 @@ namespace XiaoFeng.OPC.XmlDa
         /// </summary>
         /// <param name="items">项名集</param>
         /// <returns></returns>
-        public async Task<List<NodeValue>> ReadNodeAsync(List<ItemIdentifier> items)
+        public async Task<ResponseResult<List<NodeValue>>> ReadNodeAsync(List<ItemIdentifier> items)
         {
-            if (items == null || items.Count == 0) return null;
+            if (items == null || items.Count == 0) return new ResponseResult<List<NodeValue>>("参数出错.");
             var responseResult = await this.ReadAsync(items).ConfigureAwait(false);
-            if (responseResult == null || responseResult.Status == ResponseStatus.Error || responseResult.Data == null) return null;
+            if (responseResult == null) return new ResponseResult<List<NodeValue>>("请求出错.");
+            if (responseResult.Status == ResponseStatus.Error) return new ResponseResult<List<NodeValue>>(responseResult.Message); if (responseResult.Data == null) return new ResponseResult<List<NodeValue>>("响应出错.");
             var list = new List<NodeValue>();
             foreach (var item in responseResult.Data.RItemList.Items)
             {
                 list.Add(new NodeValue(item));
             }
-            return list;
+            return new ResponseResult<List<NodeValue>>(list)
+            {
+                RequestXml = responseResult.RequestXml,
+                ResponseXml = responseResult.ResponseXml
+            };
         }
         #endregion
 
@@ -193,6 +207,10 @@ namespace XiaoFeng.OPC.XmlDa
         public async Task<ResponseResult<WriteResponse>> WriteAsync(List<ItemValue> values)
         {
             if (values == null || values.Count == 0) return new ResponseResult<WriteResponse>("参数出错.");
+            values.Each(v =>
+            {
+                v.ClientItemHandle = Guid.NewGuid().ToString("N");
+            });
             var request = new Envelope<WriteRequest>
             {
                 Body = new SoapBody<WriteRequest>
@@ -232,9 +250,9 @@ namespace XiaoFeng.OPC.XmlDa
         /// </summary>
         /// <param name="values">值</param>
         /// <returns></returns>
-        public async Task<List<NodeValue>> WriteNodeAsync(params ItemValue[] values)
+        public async Task<ResponseResult<List<NodeValue>>> WriteNodeAsync(params ItemValue[] values)
         {
-            if (values == null || values.Length == 0) return null;
+            if (values == null || values.Length == 0) return new ResponseResult<List<NodeValue>>("参数出错.");
             return await this.WriteNodeAsync(new List<ItemValue>(values)).ConfigureAwait(false);
         }
         /// <summary>
@@ -242,17 +260,22 @@ namespace XiaoFeng.OPC.XmlDa
         /// </summary>
         /// <param name="values">值</param>
         /// <returns></returns>
-        public async Task<List<NodeValue>> WriteNodeAsync(List<ItemValue> values)
+        public async Task<ResponseResult<List<NodeValue>>> WriteNodeAsync(List<ItemValue> values)
         {
-            if (values == null || values.Count == 0) return null;
+            if (values == null || values.Count == 0) return new ResponseResult<List<NodeValue>>("参数出错.");
             var responseResult = await this.WriteAsync(values).ConfigureAwait(false);
-            if (responseResult == null || responseResult.Status == ResponseStatus.Error || responseResult.Data == null) return null;
+            if (responseResult == null) return new ResponseResult<List<NodeValue>>("请求出错.");
+            if (responseResult.Status == ResponseStatus.Error) return new ResponseResult<List<NodeValue>>(responseResult.Message); if (responseResult.Data == null) return new ResponseResult<List<NodeValue>>("响应出错.");
             var list = new List<NodeValue>();
             foreach (var item in responseResult.Data.RItemList.Items)
             {
                 list.Add(new NodeValue(item));
             }
-            return list;
+            return new ResponseResult<List<NodeValue>>(list)
+            {
+                RequestXml = responseResult.RequestXml,
+                ResponseXml = responseResult.ResponseXml
+            };
         }
         #endregion
 
@@ -263,10 +286,10 @@ namespace XiaoFeng.OPC.XmlDa
         /// <param name="rate">速率</param>
         /// <param name="items">项目</param>
         /// <returns></returns>
-        public async Task<ResponseResult<SubscribeResponse>> SubscribeAsync(int rate,params ItemIdentifier[] items)
+        public async Task<ResponseResult<SubscribeResponse>> SubscribeAsync(int rate, params ItemIdentifier[] items)
         {
             if (items == null || items.Length == 0) return new ResponseResult<SubscribeResponse>("参数出错.");
-            return await this.SubscribeAsync(new List<ItemIdentifier>(items),rate).ConfigureAwait(false);
+            return await this.SubscribeAsync(new List<ItemIdentifier>(items), rate).ConfigureAwait(false);
         }
         /// <summary>
         /// 订阅
@@ -277,14 +300,25 @@ namespace XiaoFeng.OPC.XmlDa
         public async Task<ResponseResult<SubscribeResponse>> SubscribeAsync(List<ItemIdentifier> items,int rate =10000)
         {
             if (items == null || items.Count == 0) return new ResponseResult<SubscribeResponse>("参数出错.");
+
             var itemsa = new List<SubscribeRequestItem>();
+            var itemsb = new List<ItemIdentifier>();
             foreach (var name in items)
             {
+                var itemHandle = Guid.NewGuid().ToString("N");
                 itemsa.Add(new SubscribeRequestItem()
                 {
                     ItemName = name.ItemName,
                     ItemPath = name.ItemPath,
-                    ClientItemHandle = this.ClientRequestHandle
+                    ClientItemHandle = itemHandle,
+                    EnableBuffering = true,
+                    RequestedSamplingRate = rate
+                });
+                itemsb.Add(new ItemIdentifier
+                {
+                    ItemHandle = itemHandle,
+                    ItemName = name.ItemName,
+                    ItemPath = name.ItemPath
                 });
             }
             var request = new Envelope<SubscribeRequest>
@@ -305,9 +339,11 @@ namespace XiaoFeng.OPC.XmlDa
                         },
                         ItemList = new SubscribeRequestItemList
                         {
-                            Items = itemsa
+                            Items = itemsa,
+                            EnableBuffering = true
                         },
-                        SubscriptionPingRate = rate
+                        SubscriptionPingRate = rate,
+                        ReturnValuesOnReply = true
                     }
                 }
             };
@@ -316,7 +352,24 @@ namespace XiaoFeng.OPC.XmlDa
                 var entity = html.XmlToEntity<Envelope<SubscribeResponse>>();
                 if (entity != null && entity.Body?.Value != null)
                 {
-                    return entity.Body?.Value;
+                    var value = entity.Body?.Value;
+                    if (value.ServerSubHandle.IsNotNullOrEmpty())
+                    {
+                        var sub = new Subscription
+                        {
+                            Id = value.ServerSubHandle,
+                            UpdateRate = rate,
+                            Items = itemsb,
+                            DaClient = this
+                        };
+                        if (this.SubscriptinNotification != null)
+                            sub.Notification += this.SubscriptinNotification;
+                        SubscriptionManager.AddSubscription(sub, (manager, subscription) =>
+                        {
+
+                        });
+                    }
+                    return value;
                 }
                 return null;
             }).ConfigureAwait(false);
@@ -324,11 +377,110 @@ namespace XiaoFeng.OPC.XmlDa
         #endregion
 
         #region 取消订阅
-
+        /// <summary>
+        /// 取消订阅
+        /// </summary>
+        /// <param name="serverSubHandle">服务器子句柄</param>
+        /// <returns></returns>
+        public async Task<ResponseResult<SubscriptionCancelResponse>> SubscriptionCancelAsync(string serverSubHandle)
+        {
+            if (serverSubHandle.IsNullOrEmpty()) return new ResponseResult<SubscriptionCancelResponse>("参数出错.");
+            var request = new Envelope<SubscriptionCancelRequest>
+            {
+                Body = new SoapBody<SubscriptionCancelRequest>
+                {
+                    Value = new SubscriptionCancelRequest
+                    {
+                        ClientRequestHandle = this.ClientRequestHandle,
+                        ServerSubHandle = serverSubHandle
+                    }
+                }
+            };
+            return await this.ExecuteAsync(SoapAction.SubscriptionCancel, request, html =>
+            {
+                var entity = html.XmlToEntity<Envelope<SubscriptionCancelResponse>>();
+                if (entity != null && entity.Body?.Value != null)
+                {
+                    this.SubscriptionManager.RemoveSubscription(serverSubHandle);
+                    return entity.Body?.Value;
+                }
+                return null;
+            }).ConfigureAwait(false);
+        }
         #endregion
 
-        #region 轮询订阅
+        #region 轮询查询订阅
+        /// <summary>
+        /// 轮询查询订阅
+        /// </summary>
+        /// <param name="subscriptionIds">订阅ID</param>
+        /// <param name="returnAllItems">是否返回所有项 如果false则只返回变动的项</param>
+        /// <returns></returns>
+        public async Task<ResponseResult<SubscriptionPolledRefreshResponse>> SubscriptionPolledRefreshAsync(List<string> subscriptionIds, bool returnAllItems = false)
+        {
+            if (subscriptionIds.IsNullOrEmpty() || subscriptionIds.Count == 0) return new ResponseResult<SubscriptionPolledRefreshResponse>("参数出错.");
+            var request = new Envelope<SubscriptionPolledRefreshRequest>
+            {
+                Body = new SoapBody<SubscriptionPolledRefreshRequest>
+                {
+                    Value = new SubscriptionPolledRefreshRequest
+                    {
+                        Options = new RequestOptions
+                        {
+                            ClientRequestHandle = this.ClientRequestHandle,
+                            LocaleID = this.LocaleID,
+                            ReturnDiagnosticInfo = true,
+                            ReturnErrorText = true,
+                            ReturnItemPath = true,
+                            ReturnItemTime = true,
+                            ReturnTimeName = true
+                        },
+                        ServerSubHandles = subscriptionIds,
+                        ReturnAllItems = returnAllItems
+                    }
+                }
+            };
+            return await this.ExecuteAsync(SoapAction.SubscriptionPolledRefresh, request, html =>
+            {
+                var entity = html.XmlToEntity<Envelope<SubscriptionPolledRefreshResponse>>();
+                if (entity != null && entity.Body?.Value != null)
+                {
+                    return entity.Body?.Value;
+                }
+                return null;
+            }).ConfigureAwait(false);
+        }
+        /// <summary>
+        /// 轮询查询订阅
+        /// </summary>
+        /// <param name="subscriptionIds">订阅ID</param>
+        /// <param name="returnAllItems">是否返回所有项 如果false则只返回变动的项</param>
+        /// <returns></returns>
+        public async Task<ResponseResult<Dictionary<string, List<ItemValue>>>> SubscriptionPolledRefreshNodesAsync(List<string> subscriptionIds, bool returnAllItems = false)
+        {
+            if (subscriptionIds == null || subscriptionIds.Count == 0) return new ResponseResult<Dictionary<string, List<ItemValue>>>("参数出错.");
 
+            var polledRefresh = await this.SubscriptionPolledRefreshAsync(subscriptionIds, returnAllItems).ConfigureAwait(false);
+
+            if (polledRefresh == null) return new ResponseResult<Dictionary<string, List<ItemValue>>>("请求出错.");
+            if (polledRefresh.Status == ResponseStatus.Error)
+                return new ResponseResult<Dictionary<string, List<ItemValue>>>(polledRefresh.Message)
+                {
+                    RequestXml = polledRefresh.RequestXml,
+                    ResponseXml = polledRefresh.ResponseXml
+                };
+            var dict = new Dictionary<string, List<ItemValue>>();
+            foreach (var d in polledRefresh.Data.RItemList)
+            {
+                dict.Add(d.SubscriptionHandle, d.Items);
+            }
+            return new ResponseResult<Dictionary<string, List<ItemValue>>>
+            {
+                RequestXml = polledRefresh.RequestXml,
+                ResponseXml = polledRefresh.ResponseXml,
+                Data = dict
+            };
+        }
         #endregion
 
         #region 浏览
@@ -451,9 +603,9 @@ namespace XiaoFeng.OPC.XmlDa
         /// </summary>
         /// <param name="items">项目</param>
         /// <returns></returns>
-        public async Task<Dictionary<string,List<ItemProperty>>> GetNodePropertiesAsync(params ItemIdentifier[] items)
+        public async Task<ResponseResult<Dictionary<string,List<ItemProperty>>>> GetNodePropertiesAsync(params ItemIdentifier[] items)
         {
-            if (items == null || items.Length == 0) return null;
+            if (items == null || items.Length == 0) return new ResponseResult<Dictionary<string, List<ItemProperty>>>("参数出错.");
             return await this.GetNodePropertiesAsync(new List<ItemIdentifier>(items)).ConfigureAwait(false);
         }
         /// <summary>
@@ -461,17 +613,23 @@ namespace XiaoFeng.OPC.XmlDa
         /// </summary>
         /// <param name="items">项目</param>
         /// <returns></returns>
-        public async Task<Dictionary<string, List<ItemProperty>>> GetNodePropertiesAsync(List<ItemIdentifier> items)
+        public async Task<ResponseResult<Dictionary<string, List<ItemProperty>>>> GetNodePropertiesAsync(List<ItemIdentifier> items)
         {
             if (items == null || items.Count == 0) return null;
             var responseResult = await this.GetPropertiesAsync(items).ConfigureAwait(false);
             if (responseResult == null || responseResult.Status == ResponseStatus.Error || responseResult.Data == null) return null;
+            if (responseResult == null) return new ResponseResult<Dictionary<string, List<ItemProperty>>>("请求出错.");
+            if (responseResult.Status == ResponseStatus.Error) return new ResponseResult<Dictionary<string, List<ItemProperty>>>(responseResult.Message); if (responseResult.Data == null) return new ResponseResult<Dictionary<string, List<ItemProperty>>>("响应出错.");
             var dic = new Dictionary<string, List<ItemProperty>>();
             foreach (var item in responseResult.Data.PropertyLists)
             {
                 dic.Add(item.ItemName,item.Properties);
             }
-            return dic;
+            return new ResponseResult<Dictionary<string, List<ItemProperty>>>(dic)
+            {
+                RequestXml = responseResult.RequestXml,
+                ResponseXml = responseResult.ResponseXml
+            };
         }
         #endregion
 

@@ -50,12 +50,12 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// 死区
         /// </summary>
         [XmlAttribute("Deadband")]
-        public float Deadband { get; set; }
+        public float? Deadband { get; set; }
         /// <summary>
         /// 请求的采样率
         /// </summary>
         [XmlAttribute("RequestedSamplingRate")]
-        public int RequestedSamplingRate { get; set; }
+        public int RequestedSamplingRate { get; set; } = 1000;
         /// <summary>
         /// 启用缓冲
         /// </summary>

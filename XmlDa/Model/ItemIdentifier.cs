@@ -49,6 +49,11 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// </summary>
         [XmlAttribute("ItemName")]
         public string ItemName { get; set; }
+        /// <summary>
+        /// 项句柄
+        /// </summary>
+        [XmlAttribute("ItemHandle")] 
+        public string ItemHandle { get; set; }
         #endregion
 
         #region 方法

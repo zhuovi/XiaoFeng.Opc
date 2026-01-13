@@ -39,7 +39,8 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 项列表
         /// </summary>
-        public SubscribePolledRefreshReplyItemList RItemList { get; set; }
+        [XmlArrayItem("RItemList")]
+        public List<SubscribePolledRefreshReplyItemList> RItemList { get; set; }
         /// <summary>
         /// 错误信息
         /// </summary>

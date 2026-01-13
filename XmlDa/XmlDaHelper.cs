@@ -16,6 +16,12 @@ using XiaoFeng.OPC.XmlDa.Model;
 namespace XiaoFeng.OPC.XmlDa
 {
     /// <summary>
+    /// 委托事件
+    /// </summary>
+    /// <param name="subscriptionId">订阅ID</param>
+    /// <param name="items">值列表</param>
+    public delegate void NotificationEventHadler(string subscriptionId,List<ItemValue> items);
+    /// <summary>
     /// 帮助类
     /// </summary>
     public class XmlDaHelper

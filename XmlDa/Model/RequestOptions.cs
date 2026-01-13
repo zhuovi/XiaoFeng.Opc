@@ -60,7 +60,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// 请求截止日期
         /// </summary>
         [XmlAttribute("RequestDeadline")]
-        public DateTime RequestDeadline { get; set; }
+        public DateTime? RequestDeadline { get; set; }
         /// <summary>
         /// 区域ID
         /// </summary>

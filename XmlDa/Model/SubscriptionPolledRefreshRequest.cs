@@ -40,20 +40,20 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 服务器子句柄
         /// </summary>
-        [XmlElement("ServerSubHandles")]
+        [XmlArrayItem("ServerSubHandles")]
         public List<string> ServerSubHandles { get; set; }
         /// <summary>
         /// 保持时间
         /// </summary>
         [XmlAttribute("HoldTime")]
-        public DateTime HoldTime { get; set; }
+        public DateTime? HoldTime { get; set; }
         /// <summary>
         /// 等待时间
         /// </summary>
         [XmlAttribute("WaitTime")]
-        public int WaitTime { get; set; }
+        public int? WaitTime { get; set; }
         /// <summary>
-        /// 返回所有项目
+        /// 是否返回所有项目，如果为false则只返回变动项
         /// </summary>
         [XmlAttribute("ReturnAllItems")]
         public bool ReturnAllItems { get; set; }
