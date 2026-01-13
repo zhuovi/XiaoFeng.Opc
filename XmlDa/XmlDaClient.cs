@@ -374,7 +374,7 @@ namespace XiaoFeng.OPC.XmlDa
         /// <param name="browseAll">是否浏览所有节点</param>
         /// <param name="options">请求配置</param>
         /// <returns></returns>
-        public async Task<List<NodeValue>> BrowseAsync(bool browseAll = false, BrowseRequest options = null)
+        public async Task<List<NodeValue>> BrowseNodesAsync(bool browseAll = false, BrowseRequest options = null)
         {
             if (options == null)
                 options = new BrowseRequest
@@ -395,7 +395,7 @@ namespace XiaoFeng.OPC.XmlDa
                 if (browseAll && nodeValue.HasChildren)
                 {
                     options.ItemName = e.ItemName;
-                    nodeValue.ChildNodes = await this.BrowseAsync(browseAll, options).ConfigureAwait(false); 
+                    nodeValue.ChildNodes = await this.BrowseNodesAsync(browseAll, options).ConfigureAwait(false); 
                 }
             };
             return list;
@@ -500,10 +500,11 @@ namespace XiaoFeng.OPC.XmlDa
                 IsReset=true,
                 Timeout=100000,
                 ContentType="text/xml",
+                UserAgent= "Mozilla/4.0 (compatible; MSIE 6.0; MS Web Services Client Protocol 2.0.50727.9179)",
                 BodyData = requestBody.EntityToXml().format(((double)this.OpcXmlVersion / 10).ToString("F1"))
             };
             result.RequestXml = http.BodyData;
-            http.AddHeader("SOAPAction", XmlDaHelper.GetSoapAction(soapAction, this.OpcXmlVersion));
+            http.AddHeader("SOAPAction",$@"""{XmlDaHelper.GetSoapAction(soapAction, this.OpcXmlVersion)}""");
             var response = await http.GetResponseAsync().ConfigureAwait(false);
             result.ResponseXml = response.Html;
             http.Dispose();
@@ -515,10 +516,10 @@ namespace XiaoFeng.OPC.XmlDa
                     if (result.Data != null) result.Status = ResponseStatus.Success;
                     return result;
                 }
-                result.Message = "响应格式不正确.";
+                result.Message = "响应格式不正确:"+response.Html;
                 return result;
             }
-            result.Message = "响应出错";
+            result.Message = "响应出错:" + response.Html;
             return result;
         }
         #endregion

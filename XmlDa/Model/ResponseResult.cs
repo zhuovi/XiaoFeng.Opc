@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+using XiaoFeng.Xml;
+using XiaoFeng.Json;
+using System.Xml.Serialization;
 /****************************************************************
 *  Copyright © (2026) www.eelf.cn All Rights Reserved.          *
 *  Author : jacky                                               *
@@ -85,10 +87,12 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 请求包
         /// </summary>
+        [XmlIgnore,JsonIgnore]
         public string RequestXml { get; set; }
         /// <summary>
         /// 响应包
         /// </summary>
+        [XmlIgnore, JsonIgnore] 
         public string ResponseXml { get; set; }
         #endregion
 

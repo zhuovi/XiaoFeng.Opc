@@ -53,7 +53,7 @@ namespace XiaoFeng.OPC.XmlDa
         /// <returns></returns>
         public static string GetSoapAction(SoapAction soapAction, OpcXmlVersion soapVersion= OpcXmlVersion.XmlDa10)
         {
-            return $"http://opcfoundation.org/XMLDA/{(double)soapVersion/10:F2}/{soapAction}";
+            return $"http://opcfoundation.org/webservices/XMLDA/{(double)soapVersion/10:F1}/{soapAction}";
         }
         #endregion
 

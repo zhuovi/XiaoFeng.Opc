@@ -72,11 +72,13 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 支持区域ID
         /// </summary>
-        public string SupportedLocaleIDs { get; set; }
+        [XmlArrayItem("SupportedLocaleIDs")]
+        public List<string> SupportedLocaleIDs { get; set; }
         /// <summary>
         /// 支持接口版本
         /// </summary>
-        public string SupportedInterfaceVersions { get; set; }
+        [XmlArrayItem("SupportedInterfaceVersions")]
+        public List<string> SupportedInterfaceVersions { get; set; }
         #endregion
 
         #region 方法
