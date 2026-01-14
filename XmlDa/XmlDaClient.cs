@@ -58,6 +58,14 @@ namespace XiaoFeng.OPC.XmlDa
         /// 订阅回调器
         /// </summary>
         public event NotificationEventHadler SubscriptinNotification;
+        /// <summary>
+        /// 请求超时时间 单位为毫秒
+        /// </summary>
+        public int Timeout { get; set; } = 10000;
+        /// <summary>
+        /// 用户代理/客户端信息
+        /// </summary>
+        public string UserAgent { get; set; } = "Mozilla/4.0 (compatible; MSIE 6.0; MS Web Services Client Protocol 2.0.50727.9179)";
         #endregion
 
         #region 方法
@@ -340,9 +348,10 @@ namespace XiaoFeng.OPC.XmlDa
                         ItemList = new SubscribeRequestItemList
                         {
                             Items = itemsa,
-                            EnableBuffering = true
+                            EnableBuffering = true, 
+                            RequestedSamplingRate = rate
                         },
-                        SubscriptionPingRate = rate,
+                        SubscriptionPingRate = rate/2,
                         ReturnValuesOnReply = true
                     }
                 }
@@ -655,14 +664,14 @@ namespace XiaoFeng.OPC.XmlDa
             var http = new HttpRequest(this.ServerAddress.ToString())
             {
                 Method = HttpMethod.Post,
-                IsReset=true,
-                Timeout=100000,
-                ContentType="text/xml",
-                UserAgent= "Mozilla/4.0 (compatible; MSIE 6.0; MS Web Services Client Protocol 2.0.50727.9179)",
+                IsReset = true,
+                Timeout = this.Timeout,
+                ContentType = "text/xml",
+                UserAgent = this.UserAgent,
                 BodyData = requestBody.EntityToXml().format(((double)this.OpcXmlVersion / 10).ToString("F1"))
             };
             result.RequestXml = http.BodyData;
-            http.AddHeader("SOAPAction",$@"""{XmlDaHelper.GetSoapAction(soapAction, this.OpcXmlVersion)}""");
+            http.AddHeader("SOAPAction", $@"""{XmlDaHelper.GetSoapAction(soapAction, this.OpcXmlVersion)}""");
             var response = await http.GetResponseAsync().ConfigureAwait(false);
             result.ResponseXml = response.Html;
             http.Dispose();
@@ -674,7 +683,7 @@ namespace XiaoFeng.OPC.XmlDa
                     if (result.Data != null) result.Status = ResponseStatus.Success;
                     return result;
                 }
-                result.Message = "响应格式不正确:"+response.Html;
+                result.Message = "响应格式不正确:" + response.Html;
                 return result;
             }
             result.Message = "响应出错:" + response.Html;

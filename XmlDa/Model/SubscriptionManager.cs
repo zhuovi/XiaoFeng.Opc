@@ -26,7 +26,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// </summary>
         public SubscriptionManager()
         {
-
+            
         }
         #endregion
 

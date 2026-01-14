@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
+using XiaoFeng.OPC.XML;
 
 /****************************************************************
 *  Copyright © (2026) www.eelf.cn All Rights Reserved.          *
@@ -38,7 +39,8 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 值
         /// </summary>
-        public string Value { get; set; }
+        [XmlElement("Value")]
+        public OpcValue Value { get; set; }
         /// <summary>
         /// 质量
         /// </summary>
