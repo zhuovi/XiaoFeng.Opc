@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 /****************************************************************
 *  Copyright © (2026) www.eelf.cn All Rights Reserved.          *
@@ -28,13 +29,37 @@ namespace XiaoFeng.OPC.XmlDa.Model
         {
             
         }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="daClient">客户端</param>
+        public SubscriptionManager(XmlDaClient daClient)
+        {
+            this.DaClient = daClient;
+        }
         #endregion
 
         #region 属性
         /// <summary>
+        /// 客户端
+        /// </summary>
+        private XmlDaClient DaClient { get; set; }
+        /// <summary>
         /// 订阅数据
         /// </summary>
         private ConcurrentDictionary<string, Subscription> SubscriptionCollection = new ConcurrentDictionary<string, Subscription>();
+        /// <summary>
+        /// 取消标识
+        /// </summary>
+        private CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
+        /// <summary>
+        /// 更新速率
+        /// </summary>
+        private int UpdateRate { get; set; }
+        /// <summary>
+        /// 回调事件
+        /// </summary>
+        public event NotificationEventHadler Notifiation;
         #endregion
 
         #region 方法
@@ -58,8 +83,9 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <param name="subscriptionId">订阅Id</param>
         public bool RemoveSubscription(string subscriptionId)
         {
-            if(this.SubscriptionCollection.TryRemove(subscriptionId, out var _)){
-
+            if (this.SubscriptionCollection.TryRemove(subscriptionId, out var subscription))
+            {
+                subscription.Stop();
                 return true;
             }
             return false;
@@ -67,12 +93,12 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 获取订阅
         /// </summary>
-        /// <param name="id">订阅ID</param>
+        /// <param name="subscriptionId">订阅ID</param>
         /// <param name="subscription">订阅</param>
         /// <returns></returns>
-        public bool TryGet(string id, out Subscription subscription)
+        public bool TryGet(string subscriptionId, out Subscription subscription)
         {
-            if (this.SubscriptionCollection.TryGetValue(id, out var sub))
+            if (this.SubscriptionCollection.TryGetValue(subscriptionId, out var sub))
             {
                 subscription = sub;
                 return true;
@@ -83,11 +109,11 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 是否存在订阅
         /// </summary>
-        /// <param name="id">订阅ID</param>
+        /// <param name="subscriptionId">订阅ID</param>
         /// <returns></returns>
-        public bool ContainsKey(string id)
+        public bool ContainsKey(string subscriptionId)
         {
-            return this.SubscriptionCollection.ContainsKey(id);
+            return this.SubscriptionCollection.ContainsKey(subscriptionId);
         }
         #endregion
     }

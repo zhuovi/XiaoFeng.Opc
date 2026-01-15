@@ -4,6 +4,7 @@ using System.Text;
 using XiaoFeng.Xml;
 using XiaoFeng.Json;
 using System.Xml.Serialization;
+using System.ComponentModel;
 /****************************************************************
 *  Copyright © (2026) www.eelf.cn All Rights Reserved.          *
 *  Author : jacky                                               *
@@ -31,6 +32,11 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// </summary>
         /// <param name="message">消息</param>
         public ResponseResult(string message) : base(message) { }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="status">状态</param>
+        public ResponseResult(ResponseStatus status) : base(status) { }
         /// <summary>
         /// 初始化一个新实例
         /// </summary>
@@ -72,6 +78,15 @@ namespace XiaoFeng.OPC.XmlDa.Model
         {
             this.Status = ResponseStatus.Error;
             this.Message = message;
+        }
+        /// <summary>
+        /// 初始化一个新实例
+        /// </summary>
+        /// <param name="status">状态</param>
+        public ResponseResult(ResponseStatus status)
+        {
+            this.Status = status;
+            this.Message = status.GetDescription();
         }
         #endregion
 
@@ -120,10 +135,32 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 成功
         /// </summary>
-        Success = 0,
+        [Description("成功")] 
+        Success = 200,
         /// <summary>
-        /// 失败
+        /// 解析出错
         /// </summary>
-        Error = 1,
+        [Description("解析出错")]
+        Error = 501,
+        /// <summary>
+        /// 订阅轮询失败
+        /// </summary>
+        [Description("订阅轮询失败")]
+        SubscriptionPolledRefreshFailed = 502,
+        /// <summary>
+        /// 连接失败
+        /// </summary>
+        [Description("连接失败")]
+        ConnectionFailed = 503,
+        /// <summary>
+        /// 参数出错
+        /// </summary>
+        [Description("参数出错")]
+        ParameterError = 504,
+        /// <summary>
+        /// 解析出错
+        /// </summary>
+        [Description("解析出错")]
+        ParseError = 505
     }
 }

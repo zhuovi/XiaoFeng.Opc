@@ -55,6 +55,10 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// </summary>
         public bool Enable { get; set; } = true;
         /// <summary>
+        /// 是否返回所有值
+        /// </summary>
+        public bool ReturnAllItems { get; set; }
+        /// <summary>
         /// 回调事件
         /// </summary>
         public event NotificationEventHadler Notification;
@@ -81,6 +85,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
             {
                 while (!this.CancellationTokenSource.IsCancellationRequested)
                 {
+                    //var dict = this.DaClient.SubscriptionPolledRefreshNodesAsync(this.Id,this.ReturnAllItems)
 
                     await Task.Delay(this.UpdateRate).ConfigureAwait(false);
                 }

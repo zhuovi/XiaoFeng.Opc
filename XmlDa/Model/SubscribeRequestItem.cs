@@ -60,7 +60,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// 请求的采样率
         /// </summary>
         [XmlAttribute("RequestedSamplingRate")]
-        public int RequestedSamplingRate { get; set; } = 1000;
+        public int? RequestedSamplingRate { get; set; }
         /// <summary>
         /// 启用缓冲
         /// </summary>

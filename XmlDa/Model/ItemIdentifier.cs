@@ -58,6 +58,23 @@ namespace XiaoFeng.OPC.XmlDa.Model
 
         #region 方法
 
+        /// <summary>
+        /// 强制转换
+        /// </summary>
+        /// <param name="v">值</param>
+        public static explicit operator string(ItemIdentifier v)
+        {
+            return v.ItemName;
+        }
+        /// <summary>
+        /// 隐式转换
+        /// </summary>
+        /// <param name="v">值</param>
+        public static implicit operator ItemIdentifier(string v)
+        {
+            return new ItemIdentifier(v);
+        }
+
         #region 析构器
         /// <summary>
         /// 析构器
