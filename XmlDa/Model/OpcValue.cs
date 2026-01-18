@@ -83,6 +83,11 @@ namespace XiaoFeng.OPC.XmlDa.Model
         {
             return new OpcValue(v);
         }
+        ///<inheritdoc/>
+        public override string ToString()
+        {
+            return this.Value;
+        }
         #endregion
 
     }

@@ -49,7 +49,15 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 更新速率 单位为毫秒
         /// </summary>
-        public int UpdateRate { get; set; }
+        private int _UpdateRate = 3000;
+        /// <summary>
+        /// 更新速率 单位为毫秒
+        /// </summary>
+        public int UpdateRate
+        {
+            get => this._UpdateRate;
+            set => this._UpdateRate = value < 3000 ? 3000 : value;
+        }
         /// <summary>
         /// 是否可用
         /// </summary>
@@ -61,44 +69,11 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <summary>
         /// 回调事件
         /// </summary>
-        public event NotificationEventHadler Notification;
-        /// <summary>
-        /// 取消标识
-        /// </summary>
-        private CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
-        /// <summary>
-        /// 客户端
-        /// </summary>
-        [XmlIgnore,JsonIgnore]
-        public XmlDaClient DaClient { get; set; }
+        public Action<Subscription,List<ItemValue>> Notification;
         #endregion
 
         #region 方法
-        /// <summary>
-        /// 启用订阅
-        /// </summary>
-        public void Start()
-        {
-            this.CancellationTokenSource = new CancellationTokenSource();
-            this.Enable = true;
-            Task.Run(async () =>
-            {
-                while (!this.CancellationTokenSource.IsCancellationRequested)
-                {
-                    //var dict = this.DaClient.SubscriptionPolledRefreshNodesAsync(this.Id,this.ReturnAllItems)
-
-                    await Task.Delay(this.UpdateRate).ConfigureAwait(false);
-                }
-            }, this.CancellationTokenSource.Token);
-        }
-        /// <summary>
-        /// 停用订阅
-        /// </summary>
-        public void Stop()
-        {
-            this.CancellationTokenSource.Cancel();
-            this.Enable = false;
-        }
+        
         #endregion
     }
 }

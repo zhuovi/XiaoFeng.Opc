@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using XiaoFeng.Data.SQL;
 using XiaoFeng.Http;
+using XiaoFeng.Log;
 using XiaoFeng.OPC.XmlDa.Model;
 
 /****************************************************************
@@ -29,11 +33,19 @@ namespace XiaoFeng.OPC.XmlDa
         /// </summary>
         public XmlDaClient()
         {
-            this.SubscriptionManager = new SubscriptionManager();
+            this.SubscriptionManager = new SubscriptionManager(this, this.SubscriptinNotification);
         }
         #endregion
 
         #region 属性
+        /// <summary>
+        /// 日志组件
+        /// </summary>
+        public ILog Log { get; set; } = LogFactory.Create(typeof(Logger), "XiaoFeng.Opc.XmlDa");
+        /// <summary>
+        /// 是否输出日志
+        /// </summary>
+        public bool IsConsoleLog { get; set; } = true;
         /// <summary>
         /// 区域ID
         /// </summary>
@@ -74,6 +86,14 @@ namespace XiaoFeng.OPC.XmlDa
         /// 服务器状态
         /// </summary>
         public ServerStatus ServerStatus { get;private set; }
+        /// <summary>
+        /// 代理
+        /// </summary>
+        public WebProxy Proxy { get; set; }
+        /// <summary>
+        /// 认证
+        /// </summary>
+        public Model.Authorization Authorization { get; set; }
         #endregion
 
         #region 方法
@@ -84,13 +104,23 @@ namespace XiaoFeng.OPC.XmlDa
         /// </summary>
         /// <param name="uri">地址</param>
         /// <returns></returns>
-        public async Task<bool> ConnectAsync(Uri uri)
+        public async Task<bool> ConnectAsync(Uri uri = null)
         {
             if (uri != null)
                 this.ServerAddress = uri;
+
+            if (this.ServerAddress == null) return false;
+            this.WriteLog($"Start connecting server[{this.ServerAddress}].");
             var serverStatus = await this.GetServerStatusAsync().ConfigureAwait(false);
             if (serverStatus == null || serverStatus.Status != ResponseStatus.Success) return false;
             this.ServerStatus = serverStatus.Data;
+            this.WriteLog($"Server status:{this.ServerStatus.ToJson()}");
+            this.SubscriptionManager = new SubscriptionManager(this, this.SubscriptinNotification)
+            {
+                Log = this.Log,
+                IsConsoleLog = this.IsConsoleLog
+            };
+
             return this.IsConnected = true;
         }
         #endregion
@@ -102,6 +132,7 @@ namespace XiaoFeng.OPC.XmlDa
         /// <returns></returns>
         public async Task<ResponseResult<ServerStatus>> GetServerStatusAsync()
         {
+            this.WriteLog("Start requesting server status.");
             var request = new Envelope<GetServerStatusRequest>
             {
                 Body = new SoapBody<GetServerStatusRequest>
@@ -115,6 +146,7 @@ namespace XiaoFeng.OPC.XmlDa
             };
             return await this.ExecuteAsync(SoapAction.GetStatus, request, html =>
             {
+                this.WriteLog($"Server status request completed.");
                 var entity = html.XmlToEntity<Envelope<GetServerStatusResponse>>();
                 if (entity != null && entity.Body?.Value?.ServerStatus != null)
                 {
@@ -125,7 +157,7 @@ namespace XiaoFeng.OPC.XmlDa
         }
         #endregion
 
-        #region 读项
+        #region 读取项
         /// <summary>
         /// 读取项
         /// </summary>
@@ -180,8 +212,10 @@ namespace XiaoFeng.OPC.XmlDa
                     }
                 }
             };
+            this.WriteLog($"Start requesting read item.");
             return await this.ExecuteAsync(SoapAction.Read, request, html =>
             {
+                this.WriteLog($"Request read item completed.");
                 var entity = html.XmlToEntity<Envelope<ReadResponse>>();
                 if (entity != null && entity.Body?.Value != null)
                 {
@@ -276,8 +310,10 @@ namespace XiaoFeng.OPC.XmlDa
                     }
                 }
             };
+            this.WriteLog($"Start requesting write item.");
             return await this.ExecuteAsync(SoapAction.Write, request, html =>
             {
+                this.WriteLog($"Request write item completed.");
                 var entity = html.XmlToEntity<Envelope<WriteResponse>>();
                 if (entity != null && entity.Body?.Value != null)
                 {
@@ -338,10 +374,20 @@ namespace XiaoFeng.OPC.XmlDa
         /// <summary>
         /// 订阅
         /// </summary>
+        /// <param name="subscription">订阅</param>
+        /// <returns></returns>
+        public async Task<ResponseResult<SubscribeResponse>> SubscribeAsync(Subscription subscription)
+        {
+            if (subscription == null) return new ResponseResult<SubscribeResponse>(ResponseStatus.ParameterError);
+            return await this.SubscribeAsync(subscription.Items, subscription.UpdateRate, subscription.Notification).ConfigureAwait(false);
+        }
+        /// <summary>
+        /// 订阅
+        /// </summary>
         /// <param name="items">项目</param>
         /// <param name="rate">速率</param>
         /// <returns></returns>
-        public async Task<ResponseResult<SubscribeResponse>> SubscribeAsync(List<ItemIdentifier> items, int rate = 10000)
+        public async Task<ResponseResult<SubscribeResponse>> SubscribeAsync(List<ItemIdentifier> items, int rate = 10000,Action<Subscription,List<ItemValue>> notification=null)
         {
             if (items == null || items.Count == 0) return new ResponseResult<SubscribeResponse>(ResponseStatus.ParameterError);
 
@@ -392,8 +438,10 @@ namespace XiaoFeng.OPC.XmlDa
                     }
                 }
             };
+            this.WriteLog($"Start requesting subscription.");
             return await this.ExecuteAsync(SoapAction.Subscribe, request, html =>
             {
+                this.WriteLog($"Request subscription completed.");
                 var entity = html.XmlToEntity<Envelope<SubscribeResponse>>();
                 if (entity != null && entity.Body?.Value != null)
                 {
@@ -405,14 +453,9 @@ namespace XiaoFeng.OPC.XmlDa
                             Id = value.ServerSubHandle,
                             UpdateRate = rate,
                             Items = itemsb,
-                            DaClient = this
+                            Notification = notification
                         };
-                        if (this.SubscriptinNotification != null)
-                            sub.Notification += this.SubscriptinNotification;
-                        SubscriptionManager.AddSubscription(sub, (manager, subscription) =>
-                        {
-
-                        });
+                        this.SubscriptionManager.AddSubscription(sub);
                     }
                     return value;
                 }
@@ -444,16 +487,95 @@ namespace XiaoFeng.OPC.XmlDa
                     }
                 }
             };
+            this.WriteLog($"Start requesting unsubscription[subscriptionId={subscriptionId}].");
             return await this.ExecuteAsync(SoapAction.SubscriptionCancel, request, html =>
             {
+                this.WriteLog($"Request unsubscription completed[subscriptionId={subscriptionId}].");
                 var entity = html.XmlToEntity<Envelope<SubscriptionCancelResponse>>();
                 if (entity != null && entity.Body?.Value != null)
                 {
-                    this.SubscriptionManager.RemoveSubscription(subscriptionId);
+                    this.SubscriptionManager.RemoveSubscriptionAsync(subscriptionId).ConfigureAwait(false);
                     return entity.Body?.Value;
                 }
                 return null;
             }).ConfigureAwait(false);
+        }
+        #endregion
+
+        #region 取消所有订阅
+        /// <summary>
+        /// 取消所有订阅
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ResponseResult<Dictionary<string,string>>> SubscriptionCancelAsync()
+        {
+            if (this.SubscriptionManager == null || this.SubscriptionManager.IsEmpty) return await Task.FromResult(new ResponseResult<Dictionary<string, string>>("当前没有订阅信息."));
+            var response = new ResponseResult<Dictionary<string, string>>
+            {
+                Status =  ResponseStatus.Success,
+                Data = new Dictionary<string, string>()
+            };
+            this.SubscriptionManager.Subscriptions.Each(async s =>
+            {
+                var result = await this.SubscriptionCancelAsync(s.Id).ConfigureAwait(false);
+                response.Data.Add(s.Id, result.Message);
+            });
+            await this.SubscriptionManager.ClearAsync().ConfigureAwait(false);
+            return await Task.FromResult(response);
+        }
+        #endregion
+
+        #region 启用或禁用订阅
+        /// <summary>
+        /// 启用或禁用订阅
+        /// </summary>
+        /// <param name="subscriptionId">订阅ID</param>
+        /// <param name="enable">订阅状态 true 启用  false 禁用</param>
+        /// <returns></returns>
+        public async Task<ResponseResult> EnableAsync(string subscriptionId,bool enable)
+        {
+            if (subscriptionId.IsNullOrEmpty()) return new ResponseResult(ResponseStatus.ParameterError);
+            if (this.SubscriptionManager == null || this.SubscriptionManager.IsEmpty) return await Task.FromResult(new ResponseResult($"订阅ID[{subscriptionId}]不存在."));
+            if(this.SubscriptionManager.TryGetValue(subscriptionId,out var subscription))
+            {
+                if (subscription.Enable == enable) return await Task.FromResult(new ResponseResult($"订阅ID[{subscriptionId}]状态为:{enable}"));
+                if (enable)
+                {
+                    var result = await this.SubscribeAsync(subscription.Items, subscription.UpdateRate, subscription.Notification).ConfigureAwait(false);
+                    if(result.Status== ResponseStatus.Success)
+                    {
+                        if (result.Data.ServerSubHandle.IsNotNullOrEmpty())
+                        {
+                            subscription.Id = result.Data.ServerSubHandle;
+
+                            await this.SubscriptionManager.EnableAsync(subscriptionId, enable).ConfigureAwait(false);
+
+                            return await Task.FromResult(new ResponseResult(ResponseStatus.Success)
+                            {
+                                Message = "状态设置成功"
+                            });
+                        }
+                    }
+                    return await Task.FromResult(new ResponseResult($"订阅ID[{subscriptionId}]状态设置失败."));
+                }
+                else
+                {
+                    var result = await this.SubscriptionCancelAsync(subscriptionId).ConfigureAwait(false);
+                    if(result.Status == ResponseStatus.Success)
+                    {
+                        await this.SubscriptionManager.EnableAsync(subscriptionId, enable).ConfigureAwait(false);
+                        return await Task.FromResult(new ResponseResult(ResponseStatus.Success)
+                        {
+                            Message = "状态设置成功"
+                        });
+                    }
+                    return await Task.FromResult(new ResponseResult($"订阅ID[{subscriptionId}]状态设置失败."));
+                }
+            }
+            else
+            {
+                return await Task.FromResult(new ResponseResult($"订阅ID[{subscriptionId}]不存在."));
+            }
         }
         #endregion
 
@@ -464,7 +586,7 @@ namespace XiaoFeng.OPC.XmlDa
         /// <param name="subscriptionIds">订阅ID</param>
         /// <param name="returnAllItems">是否返回所有项 如果false则只返回变动的项</param>
         /// <returns></returns>
-        public async Task<ResponseResult<SubscriptionPolledRefreshResponse>> SubscriptionPolledRefreshAsync(List<string> subscriptionIds, bool returnAllItems = false)
+        internal async Task<ResponseResult<SubscriptionPolledRefreshResponse>> SubscriptionPolledRefreshAsync(List<string> subscriptionIds, bool returnAllItems = false)
         {
             if (subscriptionIds.IsNullOrEmpty() || subscriptionIds.Count == 0) return new ResponseResult<SubscriptionPolledRefreshResponse>(ResponseStatus.ParameterError);
 
@@ -491,8 +613,10 @@ namespace XiaoFeng.OPC.XmlDa
                     }
                 }
             };
+            this.WriteLog($"Start requesting subscription polled refresh .");
             var data = await this.ExecuteAsync(SoapAction.SubscriptionPolledRefresh, request, html =>
             {
+                this.WriteLog($"Request subscription polled refresh completed.");
                 var entity = html.XmlToEntity<Envelope<SubscriptionPolledRefreshResponse>>();
                 if (entity != null && entity.Body?.Value != null)
                 {
@@ -568,8 +692,10 @@ namespace XiaoFeng.OPC.XmlDa
                     Value = option
                 }
             };
+            this.WriteLog($"Start requesting browse item.");
             return await this.ExecuteAsync(SoapAction.Browse, request, html =>
             {
+                this.WriteLog($"Request browse item completed.");
                 var entity = html.XmlToEntity<Envelope<BrowseResponse>>();
                 if (entity != null && entity.Body?.Value != null)
                 {
@@ -653,8 +779,10 @@ namespace XiaoFeng.OPC.XmlDa
                     }
                 }
             };
+            this.WriteLog($"Start requesting item properties[ItemName={items.Select(a => a.ItemName).Join(",")}].");
             return await this.ExecuteAsync(SoapAction.GetProperties, request, html =>
             {
+                this.WriteLog($"Request item properties completed[ItemName={items.Select(a => a.ItemName).Join(",")}].");
                 var entity = html.XmlToEntity<Envelope<GetPropertiesResponse>>();
                 if (entity != null && entity.Body?.Value != null)
                 {
@@ -717,7 +845,7 @@ namespace XiaoFeng.OPC.XmlDa
             result.Status = ResponseStatus.Error;
             if (this.ServerAddress.IsNullOrEmpty())
             {
-                result.Message = "服务器地址出错.";
+                result.Message = "Server address error.";
                 return result;
             }
             var http = new HttpRequest(this.ServerAddress.ToString())
@@ -729,12 +857,27 @@ namespace XiaoFeng.OPC.XmlDa
                 UserAgent = this.UserAgent,
                 BodyData = requestBody.EntityToXml().format(((double)this.OpcXmlVersion / 10).ToString("F1"))
             };
+            if (this.Proxy != null)
+                http.SetWebProxy(this.Proxy);
+
+            if (this.Authorization != null)
+            {
+                if (this.Authorization.Mode == AuthorizationMode.Header)
+                    http.AddHeader(this.Authorization.Key, this.Authorization.Token);
+                else
+                    http.Authorization = this.Authorization.ToString();
+                this.WriteLog($"Authorization:{this.Authorization.ToStringX()}");
+            }
+
             result.RequestXml = http.BodyData;
             http.AddHeader("SOAPAction", $@"""{XmlDaHelper.GetSoapAction(soapAction, this.OpcXmlVersion)}""");
+            this.WriteLog($"SOAPAction:{http.Headers["SOAPAction"]}");
+            this.WriteLog($"Request Body:{result.RequestXml}");
             var response = await http.GetResponseAsync().ConfigureAwait(false);
             result.ResponseXml = response.Html;
+            this.WriteLog($"Response Body:{result.ResponseXml}");
             http.Dispose();
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            if (response.StatusCode == HttpStatusCode.OK)
             {
                 if (response.Html.IsXml())
                 {
@@ -747,6 +890,18 @@ namespace XiaoFeng.OPC.XmlDa
             }
             result.Message = "响应出错.";
             return result;
+        }
+        #endregion
+
+        #region 输出日志
+        /// <summary>
+        /// 输出日志
+        /// </summary>
+        /// <param name="message">日志</param>
+        private void WriteLog(string message)
+        {
+            if(this.IsConsoleLog)
+                this.Log?.Debug(message);
         }
         #endregion
 
