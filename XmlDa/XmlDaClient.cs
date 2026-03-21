@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Opc.Ua.Security.Certificates;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,9 +68,17 @@ namespace XiaoFeng.OPC.XmlDa
         /// </summary>
         public SubscriptionManager SubscriptionManager { get; set; }
         /// <summary>
+        /// 订阅管理器 轮询读
+        /// </summary>
+        public SubscriptionPolledReadManager SubscriptionReadManager { get; set; }
+        /// <summary>
         /// 订阅回调器
         /// </summary>
         public event NotificationEventHadler SubscriptinNotification;
+        /// <summary>
+        /// 订阅回调器
+        /// </summary>
+        public event NotificationPolledReadEventHadler SubscriptionPolledReadNotification;
         /// <summary>
         /// 请求超时时间 单位为毫秒
         /// </summary>
@@ -116,6 +125,11 @@ namespace XiaoFeng.OPC.XmlDa
             this.ServerStatus = serverStatus.Data;
             this.WriteLog($"Server status:{this.ServerStatus.ToJson()}");
             this.SubscriptionManager = new SubscriptionManager(this, this.SubscriptinNotification)
+            {
+                Log = this.Log,
+                IsConsoleLog = this.IsConsoleLog
+            };
+            this.SubscriptionReadManager = new SubscriptionPolledReadManager(this, this.SubscriptionPolledReadNotification)
             {
                 Log = this.Log,
                 IsConsoleLog = this.IsConsoleLog
@@ -532,7 +546,7 @@ namespace XiaoFeng.OPC.XmlDa
         /// <param name="subscriptionId">订阅ID</param>
         /// <param name="enable">订阅状态 true 启用  false 禁用</param>
         /// <returns></returns>
-        public async Task<ResponseResult> EnableAsync(string subscriptionId,bool enable)
+        public async Task<ResponseResult> SubscribeEnableAsync(string subscriptionId,bool enable)
         {
             if (subscriptionId.IsNullOrEmpty()) return new ResponseResult(ResponseStatus.ParameterError);
             if (this.SubscriptionManager == null || this.SubscriptionManager.IsEmpty) return await Task.FromResult(new ResponseResult($"订阅ID[{subscriptionId}]不存在."));
@@ -664,6 +678,67 @@ namespace XiaoFeng.OPC.XmlDa
                 Data = dict
             };
         }
+        #endregion
+
+        #region 订阅 轮询查
+
+        #region 添加订阅
+        /// <summary>
+        /// 添加订阅
+        /// </summary>
+        /// <param name="subscriptionId">订阅ID</param>
+        /// <param name="rate">速率</param>
+        /// <param name="returnAllItems">返回所有项</param>
+        /// <param name="items">订阅项</param>
+        /// <returns></returns>
+        public async Task SubscribePolledReadAsync(string subscriptionId,int rate,bool returnAllItems,params ItemIdentifier[] items)
+        {
+            if (this.SubscriptionReadManager == null) this.SubscriptionReadManager = new SubscriptionPolledReadManager();
+            this.SubscriptionReadManager.AddSubscription(subscriptionId, rate, returnAllItems, this.SubscriptionPolledReadNotification, items);
+        }
+        #endregion
+
+        #region 取消订阅
+        /// <summary>
+        /// 取消订阅
+        /// </summary>
+        /// <param name="subscriptionId">取消订阅</param>
+        /// <returns></returns>
+        public async Task SubscriptionPolledReadCancelAsync(string subscriptionId)
+        {
+            if (this.SubscriptionReadManager == null || this.SubscriptionReadManager.Count == 0) return;
+            await Task.Run(() =>
+            {
+                this.SubscriptionReadManager.RemoveSubscription(subscriptionId);
+            });
+        }
+        #endregion
+
+        #region 取消所有订阅
+        /// <summary>
+        /// 取消所有订阅
+        /// </summary>
+        public void SubscriptionPolledReadCancel()
+        {
+            if (this.SubscriptionReadManager == null || this.SubscriptionReadManager.Count == 0) return;
+            this.SubscriptionReadManager.Clear();
+        }
+        #endregion
+
+        #region 启动暂停订阅
+        /// <summary>
+        /// 启动暂停订阅
+        /// </summary>
+        /// <param name="subscriptionId">订阅ID</param>
+        /// <param name="enabled">订阅状态 true 启用  false 禁用</param>
+        /// <returns></returns>
+        public async Task SubscribePolledReadEnableAsync(string subscriptionId,bool enabled)
+        {
+            if (this.SubscriptionReadManager == null || this.SubscriptionReadManager.Count == 0) return;
+            await this.SubscriptionReadManager.EnableAsync(subscriptionId, enabled).ConfigureAwait(false);
+        }
+        #endregion
+
         #endregion
 
         #region 浏览

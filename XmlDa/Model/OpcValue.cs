@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using XiaoFeng.Data.SQL;
 using XiaoFeng.Json;
+using XiaoFeng.Xml;
 
 /****************************************************************
 *  Copyright © (2026) www.eelf.cn All Rights Reserved.          *
@@ -43,7 +46,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="dataType">类型</param>
-        public OpcValue(string value,DataType dataType)
+        public OpcValue(string value, DataType dataType)
         {
             this.Value = value;
             this.XsiType = $"xsd:{dataType}";
@@ -56,10 +59,16 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// </summary>
         [XmlText]
         public string Value { get; set; }
-        [XmlAttribute("type",Namespace = "http://www.w3.org/2001/XMLSchema-instance",  // 属性的命名空间：xsi的标准URI
-            Form = XmlSchemaForm.Qualified
+        /// <summary>
+        /// 类型
+        /// </summary>
+        [XmlAttribute("type", Namespace = "http://www.w3.org/2001/XMLSchema-instance",Form = XmlSchemaForm.Qualified
         )]
-        public string XsiType{ get => this._XsiType; set => this._XsiType = value; }
+        public string XsiType
+        {
+            get => this._XsiType;
+            set => this._XsiType = value;
+        }
         /// <summary>
         /// 类型
         /// </summary>
@@ -67,6 +76,16 @@ namespace XiaoFeng.OPC.XmlDa.Model
         #endregion
 
         #region 方法
+        /// <summary>
+        /// 获取类型
+        /// </summary>
+        /// <returns></returns>
+        public Type getType()
+        {
+            var typeName = this.XsiType.StartsWith("xsd:") ? this.XsiType.SubString(4) : this.XsiType;
+
+            return Type.GetType(typeName.ToEnum<DataType>().GetTypeName().Name);
+        }
         /// <summary>
         /// 强制转换
         /// </summary>
@@ -87,6 +106,45 @@ namespace XiaoFeng.OPC.XmlDa.Model
         public override string ToString()
         {
             return this.Value;
+        }
+        /// <summary>
+        /// 获取值
+        /// </summary>
+        /// <returns></returns>
+        public object GetValue()
+        {
+            var dataType = this.XsiType;
+            if (dataType.StartsWith("xsd:")) dataType = dataType.Substring(4);
+            var isArray = dataType.StartsWith("ArrayOf") || dataType.EqualsIgnoreCase("base64Binary");
+            var typeName = dataType.ToEnum<DataType>().GetTypeName().Name;
+            var type = Type.GetType($"System.{typeName}, mscorlib");
+            if (isArray)
+            {
+                if (this.Value.IsNotNullOrEmpty())
+                {
+                    var xml = this.Value.XmlToEntity<XmlValue>();
+                    if (xml==null || !xml.HasChildNodes)return null;
+                    
+                    var arr = Array.CreateInstance(type, xml.ChildNodes.Count);
+                    for(var i = 0; i < xml.ChildNodes.Count; i++)
+                    {
+                        arr.SetValue(xml.ChildNodes[i].Value.GetValue(type), i);
+                    }
+                    return arr;
+                }
+                return null;
+            }
+            else
+                return this.Value.GetValue(type);
+        }
+        /// <summary>
+        /// 获取值
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <returns></returns>
+        public T GetValue<T>()
+        {
+            return this.Value.ToCast<T>();
         }
         #endregion
 

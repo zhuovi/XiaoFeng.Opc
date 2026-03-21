@@ -92,6 +92,13 @@ namespace XiaoFeng.OPC.XmlDa.Model
             this.Quality = item.Quality;
             this.Timestamp = item.Timestamp;
             this.Value = item.Value;
+            if (item.ValueTypeQualifier.IsNullOrEmpty() && item.Value.XsiType.IsNotNullOrEmpty())
+            {
+                var type = item.Value.XsiType;
+                type = type.StartsWith(@"xsd:") ? type.Substring(4) : type;
+                this.DataType = type.ToEnum<DataType>();
+                return;
+            }
             switch (item.ValueTypeQualifier)
             {
                 case "VT_BSTR":

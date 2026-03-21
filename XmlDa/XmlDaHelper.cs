@@ -18,9 +18,17 @@ namespace XiaoFeng.OPC.XmlDa
     /// <summary>
     /// 委托事件
     /// </summary>
-    /// <param name="subscriptionId">订阅ID</param>
+    /// <param name="manager">管理器</param>
+    /// <param name="subscription">订阅</param>
     /// <param name="items">值列表</param>
     public delegate void NotificationEventHadler(SubscriptionManager manager, Subscription subscription, List<ItemValue> items);
+    /// <summary>
+    /// 委托事件
+    /// </summary>
+    /// <param name="manager">管理器</param>
+    /// <param name="subscription">订阅</param>
+    /// <param name="items">值列表</param>
+    public delegate void NotificationPolledReadEventHadler(SubscriptionPolledReadManager manager, Subscription subscription, List<ItemValue> items);
     /// <summary>
     /// 帮助类
     /// </summary>

@@ -274,6 +274,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
                          else
                          {
                              this.WriteLog($"The subscription value has changed.");
+                             this.WriteLog(response.Data.ToJson());
                              foreach (var item in response.Data.RItemList)
                              {
                                  if (this.TryGetValue(item.SubscriptionHandle, out var sub))
@@ -300,6 +301,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
                      /*
                       * 测试
                       */
+                     /*
                      this.WriteLog($"The subscription value has changed.");
                      this.SubscriptionCollection.Keys.Each(key =>
                      {
@@ -315,7 +317,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
                              }).ForgetTaskSafe();
                          }
                      });
-
+                     */
                      await Task.Delay(this.UpdateRate.GetValueOrDefault(), this.CancellationTokenSource.Token).ConfigureAwait(false);
                  }
                  await this.StopAsync().ConfigureAwait(false);

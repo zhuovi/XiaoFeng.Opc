@@ -84,9 +84,9 @@ namespace XiaoFeng.OPC.XmlDa.Model
                 return -1;
             }
 
-            if (this == obj)
+            if (!(obj is QualifiedName))
             {
-                return 0;
+                return -1;
             }
 
             QualifiedName qualifiedName = obj as QualifiedName;

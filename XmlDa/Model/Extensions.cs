@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using XiaoFeng.OPC.XmlDa.Model;
 
 /****************************************************************
 *  Copyright © (2026) www.eelf.cn All Rights Reserved.          *
@@ -59,6 +60,21 @@ namespace XiaoFeng.OPC.XmlDa.Model
                 }
             });
             return obj;
+        }
+        /// <summary>
+        /// 获取枚举属性
+        /// </summary>
+        /// <param name="_">枚举值</param>
+        /// <param name="inherit">是否向父类查找</param>
+        /// <returns></returns>
+        public static TypeNameAttribute GetTypeName(this Enum _, bool inherit = true)
+        {
+            var types = _.GetType().GetMember(_.ToString());
+            if (types == null || types.Length == 0) return null;
+
+            var typeName = types[0].GetCustomAttribute<TypeNameAttribute>(inherit);
+            if (typeName == null) return null;
+            return typeName;
         }
         #endregion
     }
