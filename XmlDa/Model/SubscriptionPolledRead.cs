@@ -65,7 +65,11 @@ namespace XiaoFeng.OPC.XmlDa.Model
             this.Worker = new TaskJob(j =>
             {
                 this.Callback.Invoke(j, this);
-            });
+                Task.Delay(this.UpdateRate).Wait();
+            })
+            {
+                IsConsoleLog = IsDebug
+            };
             this.Worker.Run();
         }
         /// <summary>
@@ -89,16 +93,6 @@ namespace XiaoFeng.OPC.XmlDa.Model
         {
             this.Worker.Stop();
         }
-
-        #region 析构器
-        /// <summary>
-        /// 析构器
-        /// </summary>
-        ~SubscriptionPolledRead()
-        {
-
-        }
-        #endregion
 
         #endregion
     }

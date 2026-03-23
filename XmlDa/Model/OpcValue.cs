@@ -144,7 +144,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <returns></returns>
         public T GetValue<T>()
         {
-            return this.Value.ToCast<T>();
+            return (T)this.GetValue();
         }
         #endregion
 

@@ -120,6 +120,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
             sub.Items = items.ToList();
             sub.UpdateRate = rate;
             sub.IsDebug = this.IsConsoleLog;
+            sub.ReturnAllItems = returnAllItems;
             sub.Notification = (subscription, itemValues) =>
             {
                 notification?.Invoke(this, subscription, itemValues);
@@ -129,18 +130,27 @@ namespace XiaoFeng.OPC.XmlDa.Model
                 this.WriteLog($"Start read subscription[subscriptionId={subscriptionId}].");
                 var result = await this.DaClient.ReadAsync(subscription.Items).ConfigureAwait(false);
                 if (result == null || result.Status != ResponseStatus.Success) return;
+                var itemVals = result.Data.RItemList.Items;
+                this.WriteLog($"return items:{itemVals.ToJson()}");
                 if (subscription.ReturnAllItems)
                 {
-                    notification?.Invoke(this, subscription, result.Data.RItemList.Items);
-                    this.Notifiation?.Invoke(this, sub, result.Data.RItemList.Items);
+                    this.WriteLog($"return all items.");
+                    new Task(v =>
+                    {
+                        var val = v as List<ItemValue>;
+                        notification?.Invoke(this, subscription, itemVals);
+                        this.Notifiation?.Invoke(this, sub, itemVals);
+                    }, itemVals).Start();
+                    
                 }
                 else
                 {
+                    this.WriteLog($"return changed items.");
                     var list = new List<ItemValue>();
                     if (subscription.Nodes == null) subscription.Nodes = new ConcurrentDictionary<string, ItemValue>();
                     if (subscription.Nodes.Count == 0)
                     {
-                        result.Data.RItemList.Items.Each(item =>
+                        itemVals.Each(item =>
                         {
                             list.Add(item);
                             subscription.Nodes.TryAdd(item.ItemName, item);
@@ -148,7 +158,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
                     }
                     else
                     {
-                        result.Data.RItemList.Items.Each(item =>
+                        itemVals.Each(item =>
                         {
                             if (subscription.Nodes.TryGetValue(item.ItemName, out var itemValue))
                             {
@@ -164,8 +174,12 @@ namespace XiaoFeng.OPC.XmlDa.Model
                     }
                     if (list.Count > 0)
                     {
-                        notification?.Invoke(this, subscription, list);
-                        this.Notifiation?.Invoke(this, sub, list);
+                        new Task(v =>
+                        {
+                            var val = v as List<ItemValue>;
+                            notification?.Invoke(this, subscription, itemVals);
+                            this.Notifiation?.Invoke(this, sub, itemVals);
+                        }, list).Start();
                     }
                 }
                 sub.LastTime = DateTime.Now;
@@ -283,7 +297,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         private void WriteLog(string message)
         {
             if (this.IsConsoleLog)
-                this.Log?.Debug(message);
+                LogHelper.Debug(message);
         }
         #endregion
 

@@ -34,7 +34,7 @@ namespace XiaoFeng.OPC.XmlDa
         /// </summary>
         public XmlDaClient()
         {
-            this.SubscriptionManager = new SubscriptionManager(this, this.SubscriptinNotification);
+            this.SubscriptionManager = new SubscriptionManager(this, this.SubscriptionNotification);
         }
         #endregion
 
@@ -74,7 +74,7 @@ namespace XiaoFeng.OPC.XmlDa
         /// <summary>
         /// 订阅回调器
         /// </summary>
-        public event NotificationEventHadler SubscriptinNotification;
+        public event NotificationEventHadler SubscriptionNotification;
         /// <summary>
         /// 订阅回调器
         /// </summary>
@@ -124,7 +124,7 @@ namespace XiaoFeng.OPC.XmlDa
             if (serverStatus == null || serverStatus.Status != ResponseStatus.Success) return false;
             this.ServerStatus = serverStatus.Data;
             this.WriteLog($"Server status:{this.ServerStatus.ToJson()}");
-            this.SubscriptionManager = new SubscriptionManager(this, this.SubscriptinNotification)
+            this.SubscriptionManager = new SubscriptionManager(this, this.SubscriptionNotification)
             {
                 Log = this.Log,
                 IsConsoleLog = this.IsConsoleLog
@@ -691,10 +691,11 @@ namespace XiaoFeng.OPC.XmlDa
         /// <param name="returnAllItems">返回所有项</param>
         /// <param name="items">订阅项</param>
         /// <returns></returns>
-        public async Task SubscribePolledReadAsync(string subscriptionId,int rate,bool returnAllItems,params ItemIdentifier[] items)
+        public async Task SubscribePolledReadAsync(string subscriptionId,int rate,bool returnAllItems,NotificationPolledReadEventHadler notification, params ItemIdentifier[] items)
         {
             if (this.SubscriptionReadManager == null) this.SubscriptionReadManager = new SubscriptionPolledReadManager();
-            this.SubscriptionReadManager.AddSubscription(subscriptionId, rate, returnAllItems, this.SubscriptionPolledReadNotification, items);
+            
+            this.SubscriptionReadManager.AddSubscription(subscriptionId, rate, returnAllItems, notification, items);
         }
         #endregion
 
@@ -976,7 +977,7 @@ namespace XiaoFeng.OPC.XmlDa
         private void WriteLog(string message)
         {
             if(this.IsConsoleLog)
-                this.Log?.Debug(message);
+                LogHelper.Debug(message);
         }
         #endregion
 
