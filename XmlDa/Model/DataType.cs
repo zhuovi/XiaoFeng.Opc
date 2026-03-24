@@ -37,7 +37,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// 单精度浮点型
         /// </summary>
         [Description("单精度浮点型")]
-        [TypeName("Float")]
+        [TypeName("Single")]
         @float = 2,
         /// <summary>
         /// 双精度浮点型
@@ -187,8 +187,8 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// 单精度数组
         /// </summary>
         [Description("单精度数组")]
-        [TypeName("Float")] 
-        ArrayOfFloat = 27,
+        [TypeName("Single")] 
+        ArrayOfSingle = 27,
         /// <summary>
         /// 小数型数组
         /// </summary>
