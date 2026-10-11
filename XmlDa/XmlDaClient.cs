@@ -191,6 +191,8 @@ namespace XiaoFeng.OPC.XmlDa
         {
             if (items == null || items.Count == 0) return new ResponseResult<ReadResponse>(ResponseStatus.ParameterError);
 
+            this.WriteLog($"Read Items:{items.ToJson()}");
+
             if (!this.IsConnected) return new ResponseResult<ReadResponse>(ResponseStatus.ConnectionFailed);
 
             var itemsa = new List<ReadRequestItem>();

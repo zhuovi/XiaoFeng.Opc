@@ -114,7 +114,7 @@ namespace XiaoFeng.OPC.XmlDa.Model
         /// <param name="items">订阅项</param>
         public void AddSubscription(string subscriptionId, int rate, bool returnAllItems, NotificationPolledReadEventHadler notification, params ItemIdentifier[] items)
         {
-            this.WriteLog($"Start add subscription.");
+            this.WriteLog($"Start add subscription[subscriptionId={subscriptionId},rate={rate},returnAllItems={returnAllItems},items={items.ToJson()}].");
             var sub = new SubscriptionPolledRead();
             sub.Id = subscriptionId;
             sub.Items = items.ToList();
@@ -127,9 +127,9 @@ namespace XiaoFeng.OPC.XmlDa.Model
             };
             sub.Callback = async (job, subscription) =>
             {
-                this.WriteLog($"Start read subscription[subscriptionId={subscriptionId}].");
+                this.WriteLog($"Start read subscription[subscriptionId={subscriptionId},items={subscription.Items.ToJson()}].");
                 var result = await this.DaClient.ReadAsync(subscription.Items).ConfigureAwait(false);
-                if (result == null || result.Status != ResponseStatus.Success) return;
+                if (result == null || result.Status != ResponseStatus.Success) { this.WriteLog($"Response Status:{result.Status}"); return; }
                 var itemVals = result.Data.RItemList.Items;
                 this.WriteLog($"return items:{itemVals.ToJson()}");
                 if (subscription.ReturnAllItems)
@@ -162,8 +162,10 @@ namespace XiaoFeng.OPC.XmlDa.Model
                         {
                             if (subscription.Nodes.TryGetValue(item.ItemName, out var itemValue))
                             {
-                                if (itemValue.Value.Value.EqualsIgnoreCase(item.Value.Value)) return;
-                                subscription.Nodes[item.ItemName] = itemValue;
+                                //异常持续期间,即使值没有变化也需要反复报警,因此不再跳过相同值;
+                                //但缓存必须写入最新读取到的值 item,否则缓存永远停留在第一次的旧值,
+                                //后续展示/判断会一直拿到旧值(表现为"每次提醒数据值都一样")
+                                subscription.Nodes[item.ItemName] = item;
                             }
                             else
                             {
